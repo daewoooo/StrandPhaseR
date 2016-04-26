@@ -1,0 +1,159 @@
+#' This funcion will read in partial single cell haplotypes into
+#' two parallel matrices separately for Watson and Crick reads
+#' 
+#' @param path to the bam files to process
+#' @param filename with listed position of SNVs for given chromosome (format: chrName SNVpos)
+#' @param filename of all WC region for a given chromosome (format: chrName:Start:End:FileName)
+#' @param pairedEndReads Set to \code{TRUE} if you have paired-end reads in your files.
+#' @param min.mapq Minimum mapping quality when importing from BAM files.
+#' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
+#' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last pileLettersAt
+#' @importFrom Biostrings alphabetFrequency
+#' 
+#' @author David Porubsky
+ 
+
+loadMatrices <- function(datapath, positions='NULL', WCregions='NULL', pairedEndReads=TRUE, min.mapq=10) {
+  
+  ## loading list of SNVs and WC regions
+  snvs <- read.table(positions, header=F)
+  pos.list <- snvs$V2
+  snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
+  WC.regions <- read.table(WCregions, header=F, sep = ":")
+  WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))
+  
+  ## process each WC region at a time
+  snv.list <- vector()
+  watson.data <- list()
+  crick.data <- list()
+  for (i in 1:length(WC.regions)) {
+    region <- WC.regions[i]
+    
+    ## make unique ID per WC region
+    filename <- region$filename
+    region.ID <- as.character(region)
+    filename.ID <- paste(filename, region.ID, sep="__")
+    
+    message("Loading pileup for ",filename.ID)
+    
+    bamfile <- file.path(datapath,region$filename)
+    
+    ## get snv position overlaping with given WC region
+    mask <- findOverlaps(region, snvs)
+    region.snvs <- snvs[subjectHits(mask)]
+    
+    ## Check if bamindex exists
+    bamindex=bamfile
+    bamindex.raw <- sub('\\.bai$', '', bamindex)
+    bamindex <- paste0(bamindex.raw,'.bai')
+    if (!file.exists(bamindex)) {
+      bamindex.own <- Rsamtools::indexBam(bamfile)
+      warning("Couldn't find BAM index-file ",bamindex,". Creating our own file ",bamindex.own," instead.")
+      bamindex <- bamindex.own
+    }
+    
+    ## read in reads data
+    if (pairedEndReads) {
+      suppressWarnings( data.raw <- GenomicAlignments::readGAlignmentPairs(bamfile, index=bamindex, param=Rsamtools::ScanBamParam(which=range(region), what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
+    } else {
+      suppressWarnings( data.raw <- GenomicAlignments::readGAlignment(bamfile, index=bamindex, param=Rsamtools::ScanBamParam(which=range(region), what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
+    } 
+    
+    ## Second mate of the pair will inherit directionality from the first mate of the pair
+    if (pairedEndReads) {
+      data.first <- as(GenomicAlignments::first(data.raw), 'GRanges')
+      data.last <- as(GenomicAlignments::last(data.raw), 'GRanges')
+      strand(data.last) <- strand(data.first)
+      data <- sort(c(data.first, data.last))
+    } else {
+      data <- as(data.raw, 'GRanges')
+    }
+    
+    ## Filter by mapping quality
+    if (!is.null(min.mapq)) {
+      if (any(is.na(mcols(data)$mapq))) {
+        warning(paste0(file,": Reads with mapping quality NA (=255 in BAM file) found and removed. Set 'min.mapq=NULL' to keep all reads."))
+        mcols(data)$mapq[is.na(mcols(data)$mapq)] <- -1
+      }
+      data <- data[mcols(data)$mapq >= min.mapq]
+    }
+    
+    seqlevels(data) <- seqlevels(region)
+    
+    ## Split reads by directionality
+    crick <- data[strand(data) == "+"]
+    watson <- data[strand(data) == "-"]
+    
+    ## extract read sequences for watson and crick reads
+    crick.seq <- mcols(crick)$seq
+    watson.seq <- mcols(watson)$seq
+    
+    ## get piles of bases at each variable position
+    piles.crick <- GenomicAlignments::pileLettersAt(crick.seq, seqnames(crick), start(crick), mcols(crick)$cigar, region.snvs)
+    piles.watson <- GenomicAlignments::pileLettersAt(watson.seq, seqnames(watson), start(watson), mcols(watson)$cigar, region.snvs)
+    
+    crickBaseFreq.m <- alphabetFrequency(piles.crick, baseOnly=T) # get base frequency matrix
+    crickBaseFreq.collapsed <- which( crickBaseFreq.m > 0, arr.ind=T) # find postions of covered SNVs and column index for A,C,G,T as 1,2,3,4
+    crickBaseFreq.collapsed.srt <- crickBaseFreq.collapsed[order(crickBaseFreq.collapsed[,1]),] # sort by SNV postion
+    # transform obtained matrix into a vector with covered snv positions as values and base IDs as names
+    crick.v <- crickBaseFreq.collapsed.srt[,1] 
+    names(crick.v) <- crickBaseFreq.collapsed.srt[,2]
+    
+    watsonBaseFreq.m <- Biostrings::alphabetFrequency(piles.watson, baseOnly=T)
+    watsonBaseFreq.collapsed <- which( watsonBaseFreq.m > 0, arr.ind=T)
+    watsonBaseFreq.collapsed.srt <- watsonBaseFreq.collapsed[order(watsonBaseFreq.collapsed[,1]),]
+    watson.v <- watsonBaseFreq.collapsed.srt[,1]
+    names(watson.v) <- watsonBaseFreq.collapsed.srt[,2]
+    
+    ## delete duplicated snv postion (possible errors)
+    crick.v <- crick.v[!(duplicated(crick.v) | duplicated(crick.v, fromLast = TRUE)) ]
+    watson.v <- watson.v[!(duplicated(watson.v) | duplicated(watson.v, fromLast = TRUE)) ]
+    
+    ## get positions of all covered SNVs in either crick or watson reads
+    snv.list <- unique(c(snv.list, crick.v, watson.v))
+    
+    crick.data[[filename.ID]] <- crick.v
+    watson.data[[filename.ID]] <- watson.v
+  }
+  
+  ## initialize matrix with all regions as rows and covered SNVs as columns
+  crick.m <- matrix(NA, nrow = length(filenames), ncol = length(snv.list))
+  watson.m <- matrix(NA, nrow = length(filenames), ncol = length(snv.list))
+  filename.IDs <- names(crick.data)
+  message("Loading matrices")
+  
+  ## loop over all file/region IDs 
+  for (i in 1:length(filename.IDs)) {
+    filename.ID <- filename.IDs[i]
+    crick.v <- crick.data[[filename.ID]]
+    watson.v <- watson.data[[filename.ID]]
+  
+    crick.uncov.pos <- setdiff(snv.list, crick.v)
+    names(crick.uncov.pos) <- rep(0, length(crick.uncov.pos))
+    crick.read <- names( sort(c(crick.v, crick.uncov.pos)) )
+    
+    watson.uncov.pos <- setdiff(snv.list, watson.v)
+    names(watson.uncov.pos) <- rep(0, length(watson.uncov.pos))
+    watson.read <- names( sort(c(watson.v, watson.uncov.pos)) )
+    
+    crick.m[i,] <- as.numeric(crick.read)
+    watson.m[i,] <- as.numeric(watson.read)
+  }
+  
+  ## sort matrices by the number of covered SNVs (from highest to lowest)
+  cov.pos.crick <- apply(crick.m, 1, function(x) length(which(x>0)))
+  cov.pos.watson <- apply(watson.m, 1, function(x) length(which(x>0)))
+  cov <- cov.pos.crick + cov.pos.watson
+  
+  ordered.idx <- order(cov, decreasing = T)
+  crick.m <- crick.m[ordered.idx,]
+  watson.m <- watson.m[ordered.idx,]
+  filename.IDs <- filename.IDs[ordered.idx]
+  
+  ## export matrices and file IDs as single list
+  matrices <- list()
+  matrices[['crick']] <- crick.m
+  matrices[['watson']] <- watson.m
+  matrices[['row.IDs']] <- filename.IDs
+  return(matrices)
+}  

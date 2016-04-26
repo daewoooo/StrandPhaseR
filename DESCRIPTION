@@ -1,0 +1,28 @@
+Package: StrandPhaseR
+Type: Package
+Title: Phase template strands from Strand-seq data
+Version: 0.1
+Date: 2016-11-03
+Author: David Porubsky
+Maintainer: David Porubsky <d.porubsky@umcg.nl>
+Description: This package implements functions for phasing template strands from strand-seq data.
+Depends:
+  R (>= 3.1.0),
+  GenomicRanges,
+  ggplot2,
+  reshape2,
+  cowplot
+Imports:
+  IRanges,
+  Rsamtools,
+  Biostrings,
+  GenomicAlignments,
+  grid,
+  gtools
+Suggests:
+  knitr,
+  testthat
+License: 
+LazyLoad: yes
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1
