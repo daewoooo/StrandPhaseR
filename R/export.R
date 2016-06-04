@@ -49,8 +49,6 @@ exportBedGraph <- function(index, outputDirectory, fragments=NULL, col="200,100,
 #' @param phasedHap Data object containing phased haplotypes 
 #' @param bsGenome A \code{BSgenome} object which contains reference genome usedto infer reference bases
 #' @param chromosome Name of the chromosome for which we want to export vcf file
-#' @import BSgenome
-#' @import BSgenome.Hsapiens.UCSC.hg38
 
 #' @author David Porubsky, Ashley Sanders
 #' @export 
