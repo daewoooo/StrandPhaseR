@@ -7,11 +7,11 @@
 plotPhasedReads(datapath, plotChromosomes = NULL, file = NULL)
 }
 \arguments{
+\item{datapath}{containing split watson and crick reads per haplotype}
+
 \item{plotChromosomes}{}
 
 \item{file}{name of the file to save produced plots}
-
-\item{data.object}{containing split watson and crick reads per haplotype}
 }
 \description{
 This function will take phased reads for each chromosome and plot them

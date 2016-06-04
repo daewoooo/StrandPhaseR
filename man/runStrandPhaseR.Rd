@@ -8,7 +8,8 @@ runStrandPhaseR(bamfilespath, dataDirectory = "./StrandPhaseR_analysis",
   positions = NULL, WCregions = NULL, chromosomes = NULL,
   pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
   num.iterations = 2, translateBases = TRUE, score2qual = FALSE,
-  fillGaps = NULL, splitPhasedReads = FALSE, callBreaks = FALSE)
+  fillGaps = NULL, splitPhasedReads = FALSE, callBreaks = FALSE,
+  exportVCF = NULL, bsGenome = NULL)
 }
 \arguments{
 \item{bamfilespath}{Path to the bam files to process}
@@ -29,7 +30,19 @@ runStrandPhaseR(bamfilespath, dataDirectory = "./StrandPhaseR_analysis",
 
 \item{num.iterations}{Number of iteration to sort watson and crick matrices.}
 
+\item{translateBases}{}
+
+\item{score2qual}{}
+
+\item{fillGaps}{}
+
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
+
+\item{callBreaks}{}
+
+\item{exportVCF}{}
+
+\item{bsGenome}{}
 }
 \description{
 This function will move through .bam files in a folder and perform several steps (see Details).

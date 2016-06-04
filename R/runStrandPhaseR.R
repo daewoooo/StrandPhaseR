@@ -17,12 +17,24 @@
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @param min.baseq Minimum base quality to consider a base for phasing.
 #' @param num.iterations Number of iteration to sort watson and crick matrices.
+#' @param translateBases
+#' @param score2qual
+#' @param fillGaps 
 #' @param splitPhasedReads Set to \code{TRUE} if you want to split reads per haplotype.
+#' @param callBreaks
+#' @param exportVCF
+#' @param bsGenome
+ 
 #' @author David Porubsky
 #' @export
 
-runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, score2qual=FALSE, fillGaps=NULL, splitPhasedReads=FALSE, callBreaks=FALSE) {
+runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, score2qual=FALSE, fillGaps=NULL, splitPhasedReads=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
+  ## Check user input
+  if (!is.null(exportVCF) & is.null(bsGenome)) {
+	warning("VCf file cannot be created because reference genome is NULL")
+  }	
+	
   ## Creating directories for data export
   if (!file.exists(dataDirectory)) {
     dir.create(dataDirectory)
@@ -43,6 +55,11 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
     dir.create(browser.store)
   }
   
+  vcf.store <- file.path(dataDirectory, 'VCFfiles')
+  if (!file.exists(vcf.store)) {
+    dir.create(vcf.store)
+  }
+  
   ## Loading in list of SNV positions and locations of WC regions
   snvs <- read.table(positions, header=F)
   snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
@@ -52,7 +69,7 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
   ## Run phasing pipeline for selected chromosomes
   for (chr in chromosomes) {
     message("Working on ",chr)
-    
+    chr <- as.character(chr) #always consider chromosome name as character
     ## Read in all bam files
     #readsBams.chr <- readRawReads(bamfilespath=bamfilespath, chromosomes=chr, pairedEndReads=TRUE, min.mapq=10, saveRData=FALSE)
     
@@ -81,10 +98,10 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
     }
     
     #export phased haplotypes
-    destination <- file.path(data.store, paste0(chr, '_phased.RData'))
+    destination <- file.path(data.store, paste0(chr, '_phased.RData')) #save original data object with sorted matrices
     save(srt.matrices, file=destination)
     
-    destination <- file.path(phased.store, paste0(chr, '_phased_hap1.txt'))
+    destination <- file.path(phased.store, paste0(chr, '_phased_hap1.txt')) #save phased alleles per haplotype in separate files
     write.table(assem.haps$hap1.cons, file=destination, row.names = F)
     destination <- file.path(phased.store, paste0(chr, '_phased_hap2.txt'))
     write.table(assem.haps$hap2.cons, file=destination, row.names = F)
@@ -97,8 +114,12 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
     hap2.files <- data.frame(names(assem.haps$hap2.files), do.call(rbind, lapply(assem.haps$hap2.files, rbind)))
     names(hap2.files) <- c("Filenames", "Simil", "Disimil")
     write.table(hap2.files, file=destination, row.names = F)
+    
+    if (!is.null(exportVCF) & !is.null(bsGenome)) {		
+    	exportVCF(index = exportVCF, outputDirectory = vcf.store, phasedHap = assem.haps, bsGenome=bsGenome, chromosome = chr)
+    }	
   
-    #split data  
+    #split reads per haplotype  
     if (splitPhasedReads) {
       haps.gr <- splitReads(data.object=assem.haps, bamfilespath=bamfilespath, pairedEndReads=pairedEndReads, min.mapq=min.mapq)
       destination <- file.path(data.store, paste0(chr, '_reads.RData'))
@@ -121,7 +142,7 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
       strand(hap1) <- "-"
       strand(hap2) <- "+"
       phased.haps <- sort(append(hap1,hap2), ignore.strand=T)
-      breakpoints <- runBreakpointr(input.data = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chr, windowsize=15000, scaleWindowSize=TRUE)
+      breakpoints <- runBreakpointr(input.data = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chr, windowsize=15000, scaleWindowSize=TRUE, pair2frgm=TRUE)
       writeBedFile(index=chr, outputDirectory=breakspath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
     }
   }

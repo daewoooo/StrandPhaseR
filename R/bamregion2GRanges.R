@@ -8,7 +8,7 @@
 #' @param pairedEndReads Set to \code{TRUE} if you have paired-end reads in your file.
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
-#' @importFrom GenomicAlignments readGAlignmentPairsFromBam readGAlignmentsFromBam first
+#' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last
 #' @author Aaron Taudt, David Porubsky, Ashley Sanders
 #' @export
 
