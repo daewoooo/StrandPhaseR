@@ -67,7 +67,7 @@ exportVCF <- function(index=NULL, outputDirectory, phasedHap=NULL, bsGenome, chr
   hap1.alleles <- names(sort(c(hap1.pos, hap1.gap)))
   hap2.alleles <- names(sort(c(hap2.pos, hap2.gap)))
   
-  if (!grep('chr', chromosome)) { chromosome <- sub(pattern='^', replacement='chr', chromosome) } #always add 'chr' if missing at the beginning of chromosome number
+  if (!grepl('chr', chromosome)) { chromosome <- sub(pattern='^', replacement='chr', chromosome) } #always add 'chr' if missing at the beginning of chromosome number
   snv.ranges <- GRanges(seqnames=chromosome, IRanges(start=snv.pos, end=snv.pos))
   ref.alleles <- Biostrings::Views(bsGenome, snv.ranges)
   ref.alleles <- as(ref.alleles, "DNAStringSet")
