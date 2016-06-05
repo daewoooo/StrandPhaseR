@@ -17,22 +17,23 @@ exportBedGraph <- function(index, outputDirectory, fragments=NULL, col="200,100,
     mcols(gr)$chromosome <- as.factor(mcols(gr)$chromosome)
     return(gr)
   }
-
+  
   ## Write phased fragments to file
   if (!is.null(fragments)) {
     #get coverge values per genomic site
     rle.fragments.cov <- coverage(fragments)
-    fragments.cov <- unlist( runValue(rle.fragments.cov), use.names = FALSE ) #get values of coverage per genomic site 
-    fragments.cov.ranges <- unlist( ranges(rle.fragments.cov), use.names = FALSE ) #get genomic ranges with certain value of coverage 
-    fragments <- GRanges(seqnames = seqlevels(fragments), ranges = fragments.cov.ranges, cov = fragments.cov)
-    
+    fragments.cov <- BSgenome::unlist( runValue(rle.fragments.cov), use.names = FALSE ) #get values of coverage per genomic site 
+    fragments.cov.ranges <- BSgenome::unlist( ranges(rle.fragments.cov), use.names = FALSE ) #get genomic ranges with certain value of coverage 
+    fragments <- GenomicRanges::GRanges(seqnames = seqlevels(fragments), ranges = fragments.cov.ranges, cov = fragments.cov)
     fragments <- insertchr(fragments)
+
     savefile.fragments <- file.path(outputDirectory, paste0(index, '_phased.bed.gz'))
     savefile.fragments.gz <- gzfile(savefile.fragments, 'w')
     header <- paste('track type=bedGraph name=', index,'_reads description=BedGraph_of_phasedReads_',index, ' visibility=full color=',col, sep="")
-    write.table(header, file=savefile.fragments.gz, row.names=FALSE, col.names=F, quote=FALSE, append=F, sep='\t')   
+    write.table(header, file=savefile.fragments.gz, row.names=FALSE, col.names=F, quote=FALSE, append=F, sep='\t')
     if (length(fragments)>0) {
-      bedG <- as.data.frame(fragments)[c('chromosome','start','end','cov')]
+      #bedG <- as.data.frame(fragments)[c('chromosome','start','end','cov')]
+      bedG <- as(fragments, "data.frame")[c('chromosome','start','end','cov')]
     } else {
       bedG <- data.frame(chromosome='chr1', start=1, end=1, cov=NA)
     }

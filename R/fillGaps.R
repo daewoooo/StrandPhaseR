@@ -1,10 +1,7 @@
 #' This function will take both assembled haplotypes and will try to fill gaps at positions where only one allele is phased
 #' Such position have to be heterozygous so the alternative allele at this position can be reliably distinguished
 #' 
-#' @param data.object
-#' @param gr.list 
-#' @param min.baseq Minimum base quality to consider a base for phasing
-#' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
+#' @param todo
 #' @importFrom GenomicAlignments pileLettersAt
 #' @importFrom Biostrings DNAStringSet
 #' 
@@ -32,7 +29,7 @@ fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, transla
   file.header <- Rsamtools::scanBamHeader(merged.bam)[[1]]
   chrom.lengths <- file.header$targets
   chrom.len <- chrom.lengths[chromosome]
-  chrom.range <- GenomicRanges::GRanges(seqnames=chromosome, ranges=IRanges(start=1, end=chrom.len))
+  #chrom.range <- GenomicRanges::GRanges(seqnames=chromosome, ranges=IRanges(start=1, end=chrom.len))
   
   #initialize list to store HAP1 data
   hap1fillBases <- as.list(rep("", length(hap1.gaps)))
@@ -49,29 +46,31 @@ fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, transla
   hap2fillentropy <- as.list(rep(0, length(hap2.gaps)))
   
   #process data in chunks to save memory
-  chunks <- unlist(tileGenome(chrom.len, tilewidth = chunkSize))
+  chunks <- GenomicRanges::unlist(GenomicRanges::tileGenome(chrom.len, tilewidth = chunkSize))
+
   for (i in 1:length(chunks)) {
     chunk <- chunks[i]
     #message("Processing chunk ", chunk) 
-    suppressWarnings( data.raw <- GenomicAlignments::readGAlignments(merged.bam, index=merged.bam, param=Rsamtools::ScanBamParam(tag="XA", which=range(chunk), what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
-
-    data <- as(data.raw, 'GRanges')
+    #suppressWarnings( data.raw <- GenomicAlignments::readGAlignments(merged.bam, index=merged.bam, param=Rsamtools::ScanBamParam(tag="XA", which=chunk, what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
+    data <- bamregion2GRanges(bamfile=merged.bam, bamindex=merged.bam, region=chunk, pairedEndReads=FALSE, min.mapq=min.mapq, filterAltAlign=filterAltAlign)
+    
+#    data <- as(data.raw, 'GRanges')
     
     ## Filter by mapping quality
-    if (!is.null(min.mapq)) {
-      if (any(is.na(mcols(data)$mapq))) {
-        warning(paste0(file,": Reads with mapping quality NA (=255 in BAM file) found and removed. Set 'min.mapq=NULL' to keep all reads."))
-        mcols(data)$mapq[is.na(mcols(data)$mapq)] <- -1
-      }
-      data <- data[mcols(data)$mapq >= min.mapq]
-    }
+#    if (!is.null(min.mapq)) {
+#      if (any(is.na(mcols(data)$mapq))) {
+#        warning(paste0(file,": Reads with mapping quality NA (=255 in BAM file) found and removed. Set 'min.mapq=NULL' to keep all reads."))
+#        mcols(data)$mapq[is.na(mcols(data)$mapq)] <- -1
+#      }
+#      data <- data[mcols(data)$mapq >= min.mapq]
+#    }
     
     ## filter XA tag
-    if (filterAltAlign) {
-      data <- data[is.na(mcols(data)$XA)]
-    }  
+#    if (filterAltAlign) {
+#      data <- data[is.na(mcols(data)$XA)]
+#    }  
   
-  seqlevels(data) <- as.character(chromosome)
+#  seqlevels(data) <- as.character(chromosome)
   
   ## extract read sequences
   pile.seq <- mcols(data)$seq

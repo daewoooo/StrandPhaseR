@@ -86,9 +86,9 @@ splitReads <- function(data.object=NULL, bamfilespath=bamfilespath, pairedEndRea
   }
   
   ## Store data in GRanges object
-  haps <- GRangesList()
-  hap1 <- sort(unname(unlist(hap1)))
-  hap2 <- sort(unname(unlist(hap2)))
+  haps <- GenomicRanges::GRangesList()
+  hap1 <- GenomicRanges::sort(unname(GenomicRanges::unlist(hap1)))
+  hap2 <- GenomicRanges::sort(unname(GenomicRanges::unlist(hap2)))
   haps[['hap1']] <- hap1
   haps[['hap2']] <- hap2
   

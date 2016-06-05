@@ -10,11 +10,7 @@ fillGaps(data.object, merged.bam, min.mapq = 10, min.baseq = 30,
   chunkSize = 1e+07, filterAltAlign = TRUE)
 }
 \arguments{
-\item{data.object}{}
-
-\item{min.baseq}{Minimum base quality to consider a base for phasing}
-
-\item{gr.list}{}
+\item{todo}{}
 }
 \description{
 This function will take both assembled haplotypes and will try to fill gaps at positions where only one allele is phased

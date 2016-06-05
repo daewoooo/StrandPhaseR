@@ -28,7 +28,7 @@
 #' @author David Porubsky
 #' @export
 
-runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, score2qual=FALSE, fillGaps=NULL, splitPhasedReads=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
+runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, score2qual=FALSE, fillMissAllele=NULL, splitPhasedReads=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   ## Check user input
   if (!is.null(exportVCF) & is.null(bsGenome)) {
@@ -93,8 +93,8 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
     assem.haps <- assembleHaps(srt.matrices, translateBases=translateBases, score2qual=score2qual)
     
     #fill gaps in haplotypes
-    if (!is.null(fillGaps)) {
-      assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillGaps, min.baseq=min.baseq, translateBases=translateBases, score2qual=score2qual, chromosome=chr)  
+    if (!is.null(fillMissAllele)) {
+      assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, score2qual=score2qual, chromosome=chr)  
     }
     
     #export phased haplotypes
