@@ -70,11 +70,6 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
   for (chr in chromosomes) {
     message("Working on ",chr)
     chr <- as.character(chr) #always consider chromosome name as character
-    ## Read in all bam files
-    #readsBams.chr <- readRawReads(bamfilespath=bamfilespath, chromosomes=chr, pairedEndReads=TRUE, min.mapq=10, saveRData=FALSE)
-    
-    #readsBams.chr <- readsBams[seqnames(readsBams) == chr]
-    #seqlevels(readsBams.chr) <- chr
     
     #Select chromosome of interest from the list
     snvs.chr <- snvs[seqnames(snvs) == chr]
@@ -84,7 +79,6 @@ runStrandPhaseR <- function(bamfilespath, dataDirectory='./StrandPhaseR_analysis
     
     #load data into matrix  
     matrices <- loadMatrices(bamfilespath=bamfilespath, positions=snvs.chr, WCregions=WCregions.chr, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq)
-    #nonWC.reads <- matrices[['nonWC.reads']]
     
     #phase data
     srt.matrices <- sortMatrices(matrices, num.iterations=num.iterations)

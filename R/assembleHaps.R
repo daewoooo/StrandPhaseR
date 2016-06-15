@@ -35,7 +35,6 @@ assembleHaps <- function(data.object, translateBases=FALSE, score2qual=FALSE) {
   mask.hap1 <- vector()
   mask.hap2 <- vector()
   for (i in 1:length(hap1.files)) {
-    #message("Iteration ",i)
     
     ## cell hap1
     hap1.cell <- data.frame(pos=1:length(hap1[i,]), bases=hap1[i,])
@@ -113,10 +112,6 @@ assembleHaps <- function(data.object, translateBases=FALSE, score2qual=FALSE) {
   
   ## Export data as a single data object (List)
   assem.haps <- list()
-  #assem.haps[['hap1.bases']] <- hap1
-  #assem.haps[['hap2.bases']] <- hap2
-  #assem.haps[['hap1.quals']] <- hap1.quals
-  #assem.haps[['hap2.quals']] <- hap2.quals
   assem.haps[['hap1.cons']] <- hap1.cons
   assem.haps[['hap2.cons']] <- hap2.cons
   assem.haps[['hap1.files']] <- assembled.hap1

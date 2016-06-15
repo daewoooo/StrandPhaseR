@@ -50,27 +50,8 @@ fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, transla
 
   for (i in 1:length(chunks)) {
     chunk <- chunks[i]
-    #message("Processing chunk ", chunk) 
-    #suppressWarnings( data.raw <- GenomicAlignments::readGAlignments(merged.bam, index=merged.bam, param=Rsamtools::ScanBamParam(tag="XA", which=chunk, what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
+
     data <- bamregion2GRanges(bamfile=merged.bam, bamindex=merged.bam, region=chunk, pairedEndReads=FALSE, min.mapq=min.mapq, filterAltAlign=filterAltAlign)
-    
-#    data <- as(data.raw, 'GRanges')
-    
-    ## Filter by mapping quality
-#    if (!is.null(min.mapq)) {
-#      if (any(is.na(mcols(data)$mapq))) {
-#        warning(paste0(file,": Reads with mapping quality NA (=255 in BAM file) found and removed. Set 'min.mapq=NULL' to keep all reads."))
-#        mcols(data)$mapq[is.na(mcols(data)$mapq)] <- -1
-#      }
-#      data <- data[mcols(data)$mapq >= min.mapq]
-#    }
-    
-    ## filter XA tag
-#    if (filterAltAlign) {
-#      data <- data[is.na(mcols(data)$XA)]
-#    }  
-  
-#  seqlevels(data) <- as.character(chromosome)
   
   ## extract read sequences
   pile.seq <- mcols(data)$seq

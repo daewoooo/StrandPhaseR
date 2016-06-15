@@ -141,7 +141,7 @@ exportVCF <- function(index=NULL, outputDirectory, phasedHap=NULL, bsGenome, chr
   fileformat <- "##fileformat=VCFv4.2"
   date <- paste("##fileDate=",Sys.Date(),sep="")
   source.alg <- "##source=StrandPhase_algorithm"
-  reference <- "##reference=BSgenome.Hsapiens.UCSC.hg38" 
+  reference <- paste0("##reference=", quote(bsGenome)) 
   phasing <- "##phasing=Strand-seq"
   format1 <- "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">"
   format2 <- "##FORMAT=<ID=Q1,Number=1,Type=Float,Description=\"Quality measure of allele 1 (1-entropy)*coverage\">"

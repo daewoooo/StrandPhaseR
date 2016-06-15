@@ -31,10 +31,7 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
   crick.bases <- list()
   watson.quals <- list()
   crick.quals <- list()
-  #nonWC.grl <- GenomicRanges::GRangesList()
   
-  #file.list <- list.files(bamfilespath, pattern=".bam$", full=T)
-  #message("Loading reads from ", length(file.list), " bamfiles")
   message("Loading data for ",length(WCregions), " WCregions")  
   ptm <- proc.time()
   
@@ -43,22 +40,11 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
   for (file in file.list) {
     #message("Processing ", file)
     
-    #file <- basename(file)  
     bamfile <- file.path(bamfilespath, file)
     bam.reads <- bamregion2GRanges(bamfile, region=positions, pairedEndReads=pairedEndReads, min.mapq=min.mapq)
     seqlengths(WCregions) <- seqlengths(bam.reads)
     
     regions <- WCregions[WCregions$filename == file]
-    
-    #if(length(regions)>0) {
-      
-      #nonWC <- gaps(regions)
-      #nonWC <- nonWC[strand(nonWC) == "*"]
-      #mask <- findOverlaps(nonWC, bam.reads)
-      #nonWC.reads <- bam.reads[subjectHits(mask)]
-      #if (length(nonWC.reads)>0) {
-        #nonWC.grl[[file]] <- nonWC.reads
-      #}
       
       ## process each WC region at a time
       for (i in 1:length(regions)) {
@@ -84,9 +70,6 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
         bam.overlaps <- findOverlaps(region, bam.reads)
         data <- bam.reads[subjectHits(bam.overlaps)]
         seqlevels(data) <- seqlevels(region)
-        
-        ## Load data from bamfile 
-        #data <- bamregion2GRanges(bamfile, region=region.snvs, pairedEndReads=pairedEndReads, min.mapq=min.mapq)
         
         ## Split reads by directionality
         crick <- data[strand(data) == "+"]
@@ -182,12 +165,6 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
         crick.quals[[filename.ID]] <- crickQuals.v
         watson.quals[[filename.ID]] <- watsonQuals.v
       }
-      
-    #} else {
-    # nonWC.reads <- bam.reads
-    #  nonWC.grl[[file]] <- bam.reads
-    #}
-    
   }
   time <- proc.time() - ptm
   message("Time spent: ",round(time[3],2),"s")
