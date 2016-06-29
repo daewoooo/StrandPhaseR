@@ -24,57 +24,62 @@ sortMatrices <- function(data.object, num.iterations=2) {
   hap1 <- as.list(rep("", length(filename.IDs)))
   hap2 <- as.list(rep("", length(filename.IDs)))
   
-  ptm <- proc.time()
-  for (iter in 1:num.iterations) {
-    message("Sorting matrices: iteration ", iter)
-    for ( i in 1:length(filename.IDs)) {
+  ## sort matrices only if there is more than one WC region/cell
+  if (length(filename.IDs)>1) {
+  
+    for (iter in 1:num.iterations) {
+      message("  Sorting matrices: iteration ", iter, appendLF=F); ptm <- proc.time()
+      for ( i in 1:length(filename.IDs)) {
     
-      crick.pos <- which(crick.m[i,] > 0)
-      watson.pos <- which(watson.m[i,] > 0)
-      cov.pos <- union(crick.pos, watson.pos)
+        crick.pos <- which(crick.m[i,] > 0)
+        watson.pos <- which(watson.m[i,] > 0)
+        cov.pos <- union(crick.pos, watson.pos)
     
-      ## initialize score
-      crick.m.score <- calcMatrixScore(crick.m, cov.pos)
-      watson.m.score <- calcMatrixScore(watson.m, cov.pos)
+        ## initialize score
+        crick.m.score <- calcMatrixScore(crick.m, cov.pos)
+        watson.m.score <- calcMatrixScore(watson.m, cov.pos)
     
-      ## swap rows in matrices
-      hap1.filename <- files.hap1[i]
-      hap2.filename <- files.hap2[i]
-      files.hap1[i] <- hap2.filename
-      files.hap2[i] <- hap1.filename
+        ## swap rows in matrices
+        hap1.filename <- files.hap1[i]
+        hap2.filename <- files.hap2[i]
+        files.hap1[i] <- hap2.filename
+        files.hap2[i] <- hap1.filename
       
-      hap1[[i]][iter] <- hap2.filename
-      hap2[[i]][iter] <- hap1.filename
+        hap1[[i]][iter] <- hap2.filename
+        hap2[[i]][iter] <- hap1.filename
     
-      crick.row <- crick.m[i,]
-      watson.row <- watson.m[i,]
-      crick.m[i,] <- watson.row
-      watson.m[i,] <- crick.row
+        crick.row <- crick.m[i,]
+        watson.row <- watson.m[i,]
+        crick.m[i,] <- watson.row
+        watson.m[i,] <- crick.row
       
-      crickQuals.row <- crickQuals.m[i,]
-      watsonQuals.row <- watsonQuals.m[i,]
-      crickQuals.m[i,] <- watsonQuals.row
-      watsonQuals.m[i,] <- crickQuals.row
+        crickQuals.row <- crickQuals.m[i,]
+        watsonQuals.row <- watsonQuals.m[i,]
+        crickQuals.m[i,] <- watsonQuals.row
+        watsonQuals.m[i,] <- crickQuals.row
     
-      ## calculate new score
-      curr.crick.m.score <- calcMatrixScore(crick.m, cov.pos)
-      curr.watson.m.score <- calcMatrixScore(watson.m, cov.pos)
+        ## calculate new score
+        curr.crick.m.score <- calcMatrixScore(crick.m, cov.pos)
+        curr.watson.m.score <- calcMatrixScore(watson.m, cov.pos)
     
-      ## compare previous matrix score with score after swapping rows
-      if ( (crick.m.score + watson.m.score) < (curr.crick.m.score + curr.watson.m.score) ) {
-        files.hap1[i] <- hap1.filename
-        files.hap2[i] <- hap2.filename
+        ## compare previous matrix score with score after swapping rows
+        if ( (crick.m.score + watson.m.score) < (curr.crick.m.score + curr.watson.m.score) ) {
+          files.hap1[i] <- hap1.filename
+          files.hap2[i] <- hap2.filename
         
-        crick.m[i,] <- crick.row
-        watson.m[i,] <- watson.row
-        crickQuals.m[i,] <- crickQuals.row
-        watsonQuals.m[i,] <- watsonQuals.row
+          crick.m[i,] <- crick.row
+          watson.m[i,] <- watson.row
+          crickQuals.m[i,] <- crickQuals.row
+          watsonQuals.m[i,] <- watsonQuals.row
         
-        hap1[[i]][iter] <- hap1.filename
-        hap2[[i]][iter] <- hap2.filename
+          hap1[[i]][iter] <- hap1.filename
+          hap2[[i]][iter] <- hap2.filename
+        }
       }
-    }  
-  }
+      time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
+    }
+  }  
+  
   sorted.matrices <- list()
   sorted.matrices[['hap1.bases']] <- crick.m
   sorted.matrices[['hap2.bases']] <- watson.m
@@ -83,9 +88,6 @@ sortMatrices <- function(data.object, num.iterations=2) {
   sorted.matrices[['hap1.files']] <- files.hap1
   sorted.matrices[['hap2.files']] <- files.hap2
   sorted.matrices[['genomic.pos']] <- genomic.pos
-  
-  time <- proc.time() - ptm
-  message("Time spent: ",round(time[3],2),"s")
   
   return(sorted.matrices)
 }  

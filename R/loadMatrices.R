@@ -1,8 +1,10 @@
 #' This funcion will read in partial single cell haplotypes into
 #' two parallel matrices separately for Watson and Crick reads
 #' 
-#' @param gr.list
+#' @param inputfolder
 #' @param positions filename with listed position of SNVs for given chromosome (format: chrName SNVpos)
+#' @param pairedEndReads
+#' @param min.mapq
 #' @param WCregions filename of all WC region for a given chromosome (format: chrName:Start:End:FileName)
 #' @param min.baseq Minimum base quality to consider a base for phasing
 #' @importFrom GenomicAlignments pileLettersAt
@@ -12,7 +14,7 @@
 #' @export
  
 
-loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pairedEndReads=FALSE, min.mapq=10, min.baseq=30) {
+loadMatrices <- function(inputfolder=NULL, positions=NULL, WCregions=NULL, pairedEndReads=FALSE, min.mapq=10, min.baseq=30) {
   
   ## function to collapese list of letters
   collapse.str <- function(x) {
@@ -32,15 +34,14 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
   watson.quals <- list()
   crick.quals <- list()
   
-  message("Loading data for ",length(WCregions), " WCregions")  
-  ptm <- proc.time()
+  message(" Loading data for ",length(WCregions), " WCregions", appendLF=F); ptm <- proc.time()
   
   file.list <- unique(WCregions$filename)
   
   for (file in file.list) {
     #message("Processing ", file)
     
-    bamfile <- file.path(bamfilespath, file)
+    bamfile <- file.path(inputfolder, file)
     bam.reads <- bamregion2GRanges(bamfile, region=positions, pairedEndReads=pairedEndReads, min.mapq=min.mapq)
     seqlengths(WCregions) <- seqlengths(bam.reads)
     
@@ -56,7 +57,7 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
         region.ID <- as.character(region)
         filename.ID <- paste(filename, region.ID, sep="__")
         
-        bamfile <- file.path(bamfilespath, filename)
+        bamfile <- file.path(inputfolder, filename)
         
         ## get snv position overlaping with given WC region
         mask <- findOverlaps(region, positions)
@@ -166,8 +167,7 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
         watson.quals[[filename.ID]] <- watsonQuals.v
       }
   }
-  time <- proc.time() - ptm
-  message("Time spent: ",round(time[3],2),"s")
+  time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   
   ## initialize matrix with all regions as rows and covered SNVs as columns
   filename.IDs <- names(crick.bases)
@@ -209,12 +209,14 @@ loadMatrices <- function(bamfilespath=NULL, positions=NULL, WCregions=NULL, pair
   cov <- cov.pos.crick + cov.pos.watson
   
   ordered.idx <- order(cov, decreasing = T)
-  crickBases.m <- crickBases.m[ordered.idx,]
-  watsonBases.m <- watsonBases.m[ordered.idx,]
-  crickQuals.m <- crickQuals.m[ordered.idx,]
-  watsonQuals.m <- watsonQuals.m[ordered.idx,]
   
-  filename.IDs <- filename.IDs[ordered.idx]
+  if (length(ordered.idx)>1) {
+    crickBases.m <- crickBases.m[ordered.idx,]
+    watsonBases.m <- watsonBases.m[ordered.idx,]
+    crickQuals.m <- crickQuals.m[ordered.idx,]
+    watsonQuals.m <- watsonQuals.m[ordered.idx,]
+    filename.IDs <- filename.IDs[ordered.idx]
+  }
   
   ## export matrices and file IDs as single list
   matrices <- list()

@@ -2,15 +2,16 @@
 #' Such position have to be heterozygous so the alternative allele at this position can be reliably distinguished
 #' 
 #' @param todo
+#' @import GenomicRanges
 #' @importFrom GenomicAlignments pileLettersAt
 #' @importFrom Biostrings DNAStringSet
 #' 
 #' @author David Porubsky
 #' @export
 
-fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, translateBases=FALSE, score2qual=FALSE, chromosome=NULL, chunkSize=10000000, filterAltAlign=TRUE) {
-  message("Filling gaps in haplotypes")
-  ptm <- proc.time()
+fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, translateBases=FALSE, chromosome=NULL, chunkSize=10000000, filterAltAlign=TRUE) {
+ 
+  message(" Filling gaps in haplotypes", appendLF=F); ptm <- proc.time()
   
   hap1.cons <- data.object[['hap1.cons']]
   hap2.cons <- data.object[['hap2.cons']]
@@ -46,7 +47,7 @@ fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, transla
   hap2fillentropy <- as.list(rep(0, length(hap2.gaps)))
   
   #process data in chunks to save memory
-  chunks <- GenomicRanges::unlist(GenomicRanges::tileGenome(chrom.len, tilewidth = chunkSize))
+  chunks <- unlist(tileGenome(chrom.len, tilewidth = chunkSize))
 
   for (i in 1:length(chunks)) {
     chunk <- chunks[i]
@@ -170,11 +171,11 @@ filledHap1.entropy <- unlist( hap1fillentropy[mask] )
 filledHap1.pos <- hap1.gaps[mask]
   
 ## translate calcualted probabilities of correcty base call to base qualities
-if (score2qual) {
-  prob.err <- filledHap1.score - 1 #get probability of error base call (score=probability of correct base call)
-  prob.err[prob.err < 0.00006] <- 0.00006 #do this if the error probability is lower than min possible
-  filledHap1.score <- round( log10(prob.err)*-10 )
-}
+#if (score2qual) {
+#  prob.err <- filledHap1.score - 1 #get probability of error base call (score=probability of correct base call)
+#  prob.err[prob.err < 0.00006] <- 0.00006 #do this if the error probability is lower than min possible
+#  filledHap1.score <- round( log10(prob.err)*-10 )
+#}
   
 if (translateBases) {
   filledHap1.bases <- chartr("1234", "ACGT", filledHap1.bases)
@@ -195,11 +196,11 @@ filledHap2.entropy <- unlist( hap2fillentropy[mask] )
 filledHap2.pos <- hap2.gaps[mask]
   
 ## translate calcualted probabilities of correcty base call to base qualities
-if (score2qual) {
-  prob.err <- filledHap2.score - 1 #get probability of error base call (score=probability of correct base call)
-  prob.err[prob.err < 0.00006] <- 0.00006 #do this if the error probability is lower than min possible
-  filledHap2.score <- round( log10(prob.err)*-10 )
-}
+#if (score2qual) {
+#  prob.err <- filledHap2.score - 1 #get probability of error base call (score=probability of correct base call)
+#  prob.err[prob.err < 0.00006] <- 0.00006 #do this if the error probability is lower than min possible
+#  filledHap2.score <- round( log10(prob.err)*-10 )
+#}
   
 if (translateBases) {
   filledHap2.bases <- chartr("1234", "ACGT", filledHap2.bases)
@@ -217,8 +218,7 @@ filled.haps[['hap2.cons']] <- filled.hap2
 filled.haps[['hap1.files']] <- assembled.hap1
 filled.haps[['hap2.files']] <- assembled.hap2
   
-time <- proc.time() - ptm
-message("Time spent: ",round(time[3],2),"s")
+time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   
 return(filled.haps)
 }

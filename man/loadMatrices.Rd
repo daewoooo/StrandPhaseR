@@ -5,17 +5,21 @@
 \title{This funcion will read in partial single cell haplotypes into
 two parallel matrices separately for Watson and Crick reads}
 \usage{
-loadMatrices(bamfilespath = NULL, positions = NULL, WCregions = NULL,
+loadMatrices(inputfolder = NULL, positions = NULL, WCregions = NULL,
   pairedEndReads = FALSE, min.mapq = 10, min.baseq = 30)
 }
 \arguments{
+\item{inputfolder}{}
+
 \item{positions}{filename with listed position of SNVs for given chromosome (format: chrName SNVpos)}
 
 \item{WCregions}{filename of all WC region for a given chromosome (format: chrName:Start:End:FileName)}
 
-\item{min.baseq}{Minimum base quality to consider a base for phasing}
+\item{pairedEndReads}{}
 
-\item{gr.list}{}
+\item{min.mapq}{}
+
+\item{min.baseq}{Minimum base quality to consider a base for phasing}
 }
 \description{
 This funcion will read in partial single cell haplotypes into

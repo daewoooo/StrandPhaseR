@@ -2,14 +2,16 @@
 #' specific reads
 #' 
 #' @param data.object containing sorted and filtered watson and crick haplotypes of each single cell along with phase info
-#' @param gr.list
+#' @param inputfolder
+#' @param pairedEndReads
+#' @param min.mapq
 #' 
 #' @author David Porubsky
 #' @export
 
-splitReads <- function(data.object=NULL, bamfilespath=bamfilespath, pairedEndReads=FALSE, min.mapq=10) {
-  message("Printing haplotypes")
-  ptm <- proc.time()
+splitReads <- function(data.object=NULL, inputfolder=inputfolder, pairedEndReads=FALSE, min.mapq=10) {
+  
+  message(" Printing haplotypes", appendLF=F); ptm <- proc.time()
   
   hap1.files <- data.object[['hap1.files']]
   hap2.files <- data.object[['hap2.files']]
@@ -47,7 +49,7 @@ splitReads <- function(data.object=NULL, bamfilespath=bamfilespath, pairedEndRea
     
     region.gr <- GRanges(chr, IRanges(start=as.numeric(start), end=as.numeric(end)))
     
-    bamfile <- file.path(bamfilespath, filename)
+    bamfile <- file.path(inputfolder, filename)
     data <- bamregion2GRanges(bamfile, region=region.gr, pairedEndReads=pairedEndReads, min.mapq=min.mapq)
     data <- data[,3] #take along mapq metadata column from mcols 1,2,3,4
     
@@ -83,8 +85,7 @@ splitReads <- function(data.object=NULL, bamfilespath=bamfilespath, pairedEndRea
   haps[['hap1']] <- hap1
   haps[['hap2']] <- hap2
   
-  time <- proc.time() - ptm
-  message("Time spent: ",round(time[3],2),"s")
+  time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   
   return(haps)
 }  

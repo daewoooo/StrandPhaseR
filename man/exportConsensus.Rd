@@ -5,7 +5,7 @@
 \title{This funcion will load sorted watson and crick matrices and will collapsed them in order to obtain consensus string of each matrix}
 \usage{
 exportConsensus(data.bases, data.quals, filt.ambig = TRUE, min.cov = 2,
-  translateBases = FALSE, score2qual = FALSE)
+  translateBases = FALSE)
 }
 \arguments{
 \item{min.cov}{dtermines minimal number of cells covering each position to consider in consensus}

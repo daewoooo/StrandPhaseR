@@ -5,7 +5,7 @@
 \title{This will take sorted matrices and will calculate concordance of each single cell to the consensus haplotypes in order to assemble highly
 accurate haplotypes}
 \usage{
-assembleHaps(data.object, translateBases = FALSE, score2qual = FALSE)
+assembleHaps(data.object, translateBases = FALSE)
 }
 \arguments{
 \item{data.object}{containing sorted watson and crick haplotypes of each single cell}

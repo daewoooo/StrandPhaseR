@@ -4,13 +4,13 @@
 \alias{exportVCF}
 \title{Generates a VCF file from phased haplotypes}
 \usage{
-exportVCF(index = NULL, outputDirectory, phasedHap = NULL, bsGenome,
+exportVCF(index = NULL, outputfolder, phasedHap = NULL, bsGenome,
   chromosome = chr)
 }
 \arguments{
 \item{index}{Unique identifier used to index analyzed individual/sample}
 
-\item{outputDirectory}{Location to store created VCF file(s)}
+\item{outputfolder}{Location to store created VCF file(s)}
 
 \item{phasedHap}{Data object containing phased haplotypes}
 

@@ -6,8 +6,8 @@
 Such position have to be heterozygous so the alternative allele at this position can be reliably distinguished}
 \usage{
 fillGaps(data.object, merged.bam, min.mapq = 10, min.baseq = 30,
-  translateBases = FALSE, score2qual = FALSE, chromosome = NULL,
-  chunkSize = 1e+07, filterAltAlign = TRUE)
+  translateBases = FALSE, chromosome = NULL, chunkSize = 1e+07,
+  filterAltAlign = TRUE)
 }
 \arguments{
 \item{todo}{}
