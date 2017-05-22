@@ -27,12 +27,12 @@ To install the development version from Github, follow the steps given below. Th
 	Or alternatively if the above line doesn't work:
 	install_git("git://github.com/daewoooo/StrandPhaseR.git", branch = "master")
 
-#How to use BreakPointR
+### How to use BreakPointR
 
 1. Start Rstudio
 2. Load StrandPhaseR package: 	library('StrandPhaseR')
-3. Run StrandPhaseR: 	strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, chromosomes = <chromosomes2analyze>) or use config file as follows strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, configfile = <config>)
+3. Run StrandPhaseR: 	strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, chromosomes = <chromosomes2analyze>) or use config file as follows strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, configfile = <config_file>)
 
-#Report Errors
+### Report Errors
 
 If you encounter errors of any kind, please report an [issue here](https://github.com/daewoooo/StrandPhaseR/issues/new).
