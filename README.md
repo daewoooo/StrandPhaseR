@@ -6,7 +6,7 @@ R Package for phasing of single cell Strand-seq data
 
 Collaborators: David Porubsky, Ashley D. Sanders
 
-#Installation
+## Installation
 
 ### Bioconductor version (not available yet)
 Under the development.
@@ -27,7 +27,7 @@ To install the development version from Github, follow the steps given below. Th
 	Or alternatively if the above line doesn't work:
 	install_git("git://github.com/daewoooo/StrandPhaseR.git", branch = "master")
 
-### How to use BreakPointR
+## How to use StrandPhaseR
 
 1. Start Rstudio
 2. Load StrandPhaseR package: 	library('StrandPhaseR')
