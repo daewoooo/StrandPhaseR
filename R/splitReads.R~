@@ -5,12 +5,11 @@
 #' @param inputfolder
 #' @param pairedEndReads
 #' @param min.mapq
-#' @param filterAltAlign
 #' 
 #' @author David Porubsky
 #' @export
 
-splitReads <- function(data.object=NULL, inputfolder=inputfolder, pairedEndReads=FALSE, min.mapq=10, filterAltAlign=TRUE) {
+splitReads <- function(data.object=NULL, inputfolder=inputfolder, pairedEndReads=FALSE, min.mapq=10) {
   
   message(" Printing haplotypes", appendLF=F); ptm <- proc.time()
   
@@ -51,7 +50,7 @@ splitReads <- function(data.object=NULL, inputfolder=inputfolder, pairedEndReads
     region.gr <- GRanges(chr, IRanges(start=as.numeric(start), end=as.numeric(end)))
     
     bamfile <- file.path(inputfolder, filename)
-    data <- bamregion2GRanges(bamfile, region=region.gr, pairedEndReads=pairedEndReads, min.mapq=min.mapq, filterAltAlign=filterAltAlign)
+    data <- bamregion2GRanges(bamfile, region=region.gr, pairedEndReads=pairedEndReads, min.mapq=min.mapq)
     data <- data[,3] #take along mapq metadata column from mcols 1,2,3,4
     
     ## Split reads in WC regions belonging to the Hap1
