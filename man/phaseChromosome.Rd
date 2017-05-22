@@ -8,7 +8,7 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   positions = NULL, WCregions = NULL, chromosome = NULL,
   pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
   num.iterations = 2, translateBases = TRUE, fillMissAllele = NULL,
-  splitPhasedReads = FALSE, callBreaks = FALSE, exportVCF = TRUE,
+  splitPhasedReads = FALSE, callBreaks = FALSE, exportVCF = NULL,
   bsGenome = NULL)
 }
 \arguments{
