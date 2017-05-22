@@ -7,7 +7,7 @@ Author: David Porubsky
 Maintainer: David Porubsky <d.porubsky@umcg.nl>
 Description: This package implements functions for phasing template strands from strand-seq data.
 Depends:
-  R (>= 3.1.0),
+  R (>= 3.2.0),
   GenomicRanges,
   ggplot2,
   reshape2,
