@@ -24,7 +24,6 @@
 #' @param exportVCF
 #' @param bsGenome A \code{BSgenome} object which contains the refernce DNA sequence
 
-#' @import breakpointR
 #' @author David Porubsky
 #' @export
 
@@ -95,19 +94,19 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   }
     
   #call BreakPointR on phased reads object
-  if (callBreaks) {
-    breakspath <- file.path(outputfolder, 'BreakPointR')
+#  if (callBreaks) {
+#    breakspath <- file.path(outputfolder, 'BreakPointR')
       
-    if (!file.exists(breakspath)) {
-      dir.create(breakspath)
-    }
+#    if (!file.exists(breakspath)) {
+#      dir.create(breakspath)
+#    }
       
-    hap1 <- haps.gr$hap1
-    hap2 <- haps.gr$hap2
-    strand(hap1) <- "-"
-    strand(hap2) <- "+"
-    phased.haps <- sort(append(hap1,hap2), ignore.strand=T)
-    breakpoints <- runBreakpointr(bamfile = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chromosome, windowsize=50, binMethod="reads", pair2frgm=TRUE)	
-    writeBedFile(index=chromosome, outputDirectory=breakspath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
-  }
+#    hap1 <- haps.gr$hap1
+#    hap2 <- haps.gr$hap2
+#    strand(hap1) <- "-"
+#    strand(hap2) <- "+"
+#    phased.haps <- sort(append(hap1,hap2), ignore.strand=T)
+#   breakpoints <- runBreakpointr(bamfile = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chromosome, windowsize=50, binMethod="reads", pair2frgm=TRUE)	
+#    writeBedFile(index=chromosome, outputDirectory=breakspath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
+#  }
 }
