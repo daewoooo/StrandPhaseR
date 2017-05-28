@@ -53,6 +53,8 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
     data <- data[is.na(mcols(data)$XA)]
   }    
   
-  seqlevels(data) <- seqlevels(region)
+  #seqlevels(data) <- seqlevels(region)
+  data <- keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
+  	
   return(data)
 }
