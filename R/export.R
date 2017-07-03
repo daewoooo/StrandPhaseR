@@ -151,7 +151,7 @@ exportVCF <- function(index=NULL, outputfolder, phasedHap=NULL, bsGenome, chromo
   format4 <- "##FORMAT=<ID=P1,Number=1,Type=Float,Description=\"Probability value of allele 1\">"
   format5 <- "##FORMAT=<ID=P2,Number=1,Type=Float,Description=\"Probability value of allele 2\">"
   cat(fileformat,date,source.alg,reference,phasing,format1,format2,format3,format4,format5, sep = "\n", file=savefile.vcf, append=F)
-  cat("#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT", index, "\n", sep = "\t", file=savefile.vcf, append=T)
+  cat("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t", index, "\n", sep = "", file=savefile.vcf, append=T)
   
   write.table(df, file=savefile.vcf, row.names=FALSE, col.names=F, quote=FALSE, append=T, sep='\t')
   
