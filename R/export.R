@@ -140,6 +140,8 @@ exportVCF <- function(index=NULL, outputfolder, phasedHap=NULL, bsGenome, chromo
   savefile.vcf <- file.path(outputfolder, paste0(chromosome, '_phased.vcf'))
   #savefile.vcf.gz <- gzfile(savefile.vcf, 'w')
   
+  chr.len <- seqlengths(bsGenome)[seqnames(bsGenome) == chromosome]
+  
   fileformat <- "##fileformat=VCFv4.2"
   date <- paste("##fileDate=",Sys.Date(),sep="")
   source.alg <- "##source=StrandPhase_algorithm"
@@ -150,7 +152,9 @@ exportVCF <- function(index=NULL, outputfolder, phasedHap=NULL, bsGenome, chromo
   format3 <- "##FORMAT=<ID=Q2,Number=1,Type=Float,Description=\"Quality measure of allele 2 (1-entropy)*coverage\">"
   format4 <- "##FORMAT=<ID=P1,Number=1,Type=Float,Description=\"Probability value of allele 1\">"
   format5 <- "##FORMAT=<ID=P2,Number=1,Type=Float,Description=\"Probability value of allele 2\">"
-  cat(fileformat,date,source.alg,reference,phasing,format1,format2,format3,format4,format5, sep = "\n", file=savefile.vcf, append=F)
+  contig <- paste0("##contig=<ID=",chromosome, ",length=",chr.len,">")
+  cat(fileformat,date,source.alg,reference,phasing,format1,format2,format3,format4,format5,contig, sep = "\n", file=savefile.vcf, append=F)
+  #cat("##contig=<ID=",chromosome, ",length=",chr.len,">", sep="", file=savefile.vcf, append=F)
   cat("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t", index, "\n", sep = "", file=savefile.vcf, append=T)
   
   write.table(df, file=savefile.vcf, row.names=FALSE, col.names=F, quote=FALSE, append=T, sep='\t')
