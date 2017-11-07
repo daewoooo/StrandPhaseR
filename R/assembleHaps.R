@@ -40,6 +40,7 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
   
     assembled.hap1 <- list()
     assembled.hap2 <- list()
+    assembled.haps <- list()	
     mask.hap1 <- vector()
     mask.hap2 <- vector()
     for (i in 1:length(hap1.files)) {
@@ -76,6 +77,16 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
       hap2.cis.concordance <- match.cis / length(hap2.cell.bases)
       hap2.trans.concordance <- match.trans / length(hap2.cell.bases)
     
+      ## export all phased regions (unfiltered)
+      phased.info <- unlist(strsplit(hap1.files[i], '__'))
+      ID <- phased.info[1]	
+      hap1.phase <- phased.info[3]	
+      phased.region <- phased.region <-  phased.info[2]
+      phased.region <- unlist(strsplit(phased.region, ':|-'))		
+      hap2.phase <- unlist(strsplit(hap2.files[i], '__'))[3]
+      phase <- paste0(hap1.phase, hap2.phase)
+      assembled.haps[[i]] <- paste(sep = "\t", c("NA", ID, phased.region, phase, hap1.cis.concordance, hap1.trans.concordance, hap2.cis.concordance, hap2.trans.concordance))		
+
       ## Filter out unreliably phased cells
       diff.level.hap1 <- ((abs(hap1.cis.concordance - hap1.trans.concordance))/(hap1.cis.concordance + hap1.trans.concordance)/2)*100
       diff.level.hap2 <- ((abs(hap2.cis.concordance - hap2.trans.concordance))/(hap2.cis.concordance + hap2.trans.concordance)/2)*100
@@ -139,12 +150,15 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
     hap2.cons$pos <- hap2.GenomicPos
   }  
   
+  assembled.haps <- do.call(rbind, assembled.haps)	  
+
   ## Export data as a single data object (List)
   assem.haps <- list()
   assem.haps[['hap1.cons']] <- hap1.cons
   assem.haps[['hap2.cons']] <- hap2.cons
   assem.haps[['hap1.files']] <- assembled.hap1
   assem.haps[['hap2.files']] <- assembled.hap2
+  assem.haps[['assem.haps']] <- assembled.haps
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   

@@ -24,7 +24,8 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
   
   ## read in reads data
   if (pairedEndReads) {
-    suppressWarnings( data.raw <- GenomicAlignments::readGAlignmentPairs(bamfile, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(region), what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
+    #suppressWarnings( data.raw <- GenomicAlignments::readGAlignmentPairs(bamfile, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(region), what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
+    suppressWarnings( data.raw <- GenomicAlignments::readGAlignmentPairs(bamfile, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(region), what=c('seq', 'qual','mapq','cigar','flag'), )) )	
   } else {
     suppressWarnings( data.raw <- GenomicAlignments::readGAlignments(bamfile, index=bamindex, param=Rsamtools::ScanBamParam(tag="XA", which=range(region), what=c('seq', 'qual','mapq','cigar'), flag=scanBamFlag(isDuplicate=F))) )
   } 
@@ -39,6 +40,11 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
     data <- as(data.raw, 'GRanges')
   }
   
+  ## Filter duplicates
+  bit.flag <- bitwAnd(1024, data$flag)
+  mask <- bit.flag == 0 	
+  data <- data[mask]	
+
   ## Filter by mapping quality
   if (!is.null(min.mapq)) {
     if (any(is.na(mcols(data)$mapq))) {

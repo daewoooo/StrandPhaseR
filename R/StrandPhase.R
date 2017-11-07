@@ -85,6 +85,11 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   if (!file.exists(vcf.store)) {
     dir.create(vcf.store)
   }
+
+  ## export haplotypes
+  destination <- file.path(phased.store, 'phased_haps.txt')
+  phased_haps.header <- matrix(c("sample", "cell", "chrom", "start", "end", "class", "hap1.cis.simil", "hap1.trans.simil", "hap2.cis.simil", "hap2.trans.simil"), nrow = 1)	
+  write.table(data.frame(phased_haps.header), file=destination, row.names = F, quote = F, col.names = F, sep = "\t")	
   
   ## Make a copy of the conf file
   writeConfig(conf, configfile=file.path(outputfolder, 'StrandPhaseR.config'))
@@ -98,9 +103,11 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   }
   
   ## Loading in list of SNV positions and locations of WC regions
-  snvs <- read.table(conf[['positions']], header=F)
-  snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
+  #snvs <- read.table(conf[['positions']], header=F)
+  #snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
+  snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1)	
   WC.regions <- read.table(conf[['WCregions']], header=F, sep = ":")
+  #WC.regions <- read.table(conf[['WCregions']], header=F, sep = "\t")
   WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))
   
   ## Parallelization ##
