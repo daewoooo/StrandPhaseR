@@ -105,7 +105,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ## Loading in list of SNV positions and locations of WC regions
   #snvs <- read.table(conf[['positions']], header=F)
   #snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
-  snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1)	
+  snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosomes=conf[['chromosomes']])	
   WC.regions <- read.table(conf[['WCregions']], header=F, sep = ":")
   #WC.regions <- read.table(conf[['WCregions']], header=F, sep = "\t")
   WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))
