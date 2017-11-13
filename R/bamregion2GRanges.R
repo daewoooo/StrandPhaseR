@@ -60,8 +60,8 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
   }    
   
   #seqlevels(data) <- seqlevels(region)
-  #data <- keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
-  data <- keepSeqlevels(data, seqlevels(region))	
+  data <- keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
+  #data <- keepSeqlevels(data, seqlevels(region))	
   	
   return(data)
 }
