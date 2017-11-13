@@ -131,10 +131,10 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
       
       #seqlevels(snvs.chr) <- chr
       #seqlevels(WCregions.chr) <- chr
-      #snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
-      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
-      snvs.chr <- keepSeqlevels(snvs.chr, chr)
-      WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
+      snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
+      WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
+      #snvs.chr <- keepSeqlevels(snvs.chr, chr)
+      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
     
       tC <- tryCatch({
         phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
@@ -160,10 +160,10 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
       
       #seqlevels(snvs.chr) <- chr
       #seqlevels(WCregions.chr) <- chr
-      #snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
-      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
-      snvs.chr <- keepSeqlevels(snvs.chr, chr)
-      WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
+      snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
+      WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
+      #snvs.chr <- keepSeqlevels(snvs.chr, chr)
+      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
       
       #if (length(WCregions.chr)==0) {
       #  message("No WC regions for chromosome ", chr)
