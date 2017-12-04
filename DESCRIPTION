@@ -11,20 +11,27 @@ Depends:
   GenomicRanges,
   ggplot2,
   reshape2,
-  cowplot,
-  zoo,
-  fastseg
+  cowplot
 Imports:
   IRanges,
   Rsamtools,
   Biostrings,
   GenomicAlignments,
   grid,
-  gtools	
+  S4Vectors,
+  GenomeInfoDb,
+  BiocGenerics,
+  gtools,
+  doParallel,
+  foreach,
+  zoo,
+  fastseg	
 Suggests:
   knitr,
   testthat
-License: 
+License: file LICENSE 
 LazyLoad: yes
 VignetteBuilder: knitr
+biocViews: Software, Sequencing, Haplotyping
+URL: https://github.com/daewoooo/StrandPhaseR
 RoxygenNote: 5.0.1
