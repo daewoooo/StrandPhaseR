@@ -133,10 +133,19 @@ plotHapDensity <- function(datapath, perChromosome=FALSE, file=NULL, HighQual=FA
 	if(is.null(file)) { return(ggplt) }
 }		
 		
+#' This function will take phased data for each chromosome and plot density of phased SNVs 
+#' 
+#' @param data A \code{list} output from the function \code{\link{compareSingleCellHaps}}
+#' @param file name of the file to save produced plots (add appropriate file extension)
+#' 
+#' @author David Porubsky
+#' @export
 
-
-
-
+plotSingleCellHaps <- function(data, file=NULL) {
+  plt.df <- reshape2::melt(data, measure.vars = c('cons1.simil','cons2.simil'))  
+  plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
+  suppressMessages( ggsave(file, plot=plt, device="pdf", width=10, height=length(unique(plt.df$CellID))*0.5, limitsize=F) )
+}
 
 
 

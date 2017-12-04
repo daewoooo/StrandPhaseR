@@ -8,8 +8,8 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   positions = NULL, WCregions = NULL, chromosome = NULL,
   pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
   num.iterations = 2, translateBases = TRUE, fillMissAllele = NULL,
-  splitPhasedReads = FALSE, callBreaks = FALSE, exportVCF = NULL,
-  bsGenome = NULL)
+  splitPhasedReads = FALSE, compareSingleCells = FALSE,
+  callBreaks = FALSE, exportVCF = NULL, bsGenome = NULL)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
@@ -28,13 +28,21 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{num.iterations}{Number of iteration to sort watson and crick matrices.}
 
+\item{translateBases}{...}
+
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
+
+\item{compareSingleCells}{...}
+
+\item{callBreaks}{...}
+
+\item{exportVCF}{...}
 
 \item{bsGenome}{A \code{BSgenome} object which contains the refernce DNA sequence}
 
 \item{chromosomes}{If only a subset of the chromosomes should be processed, specify them here.}
 
-\item{fillGaps}{}
+\item{fillGaps}{...}
 }
 \description{
 This function will move through .bam files in a folder and perform several steps (see Details).

@@ -28,7 +28,7 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosomes=NULL) {
 
   gen.block <- strsplit(as.character(vcf[,10]),':')
   gen.block <- do.call(rbind, gen.block)
-  alleles <- strsplit(gen.block[,1],"\\/")
+  alleles <- strsplit(gen.block[,1],"\\/|\\|")
   alleles <- do.call(rbind, alleles)
 
   #filter only HET positions

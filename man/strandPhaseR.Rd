@@ -8,8 +8,9 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   configfile = NULL, numCPU = 1, positions = NULL, WCregions = NULL,
   chromosomes = NULL, pairedEndReads = TRUE, min.mapq = 10,
   min.baseq = 30, num.iterations = 2, translateBases = TRUE,
-  fillMissAllele = NULL, splitPhasedReads = FALSE, callBreaks = FALSE,
-  exportVCF = NULL, bsGenome = NULL)
+  fillMissAllele = NULL, splitPhasedReads = FALSE,
+  compareSingleCells = FALSE, callBreaks = FALSE, exportVCF = NULL,
+  bsGenome = NULL)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
@@ -32,7 +33,15 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{num.iterations}{Number of iteration to sort watson and crick matrices.}
 
+\item{translateBases}{...}
+
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
+
+\item{compareSingleCells}{...}
+
+\item{callBreaks}{...}
+
+\item{exportVCF}{...}
 
 \item{bsGenome}{A \code{BSgenome} object which contains the refernce DNA sequence}
 }

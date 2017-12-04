@@ -4,7 +4,7 @@
 \alias{vcf2ranges}
 \title{Read VCF file into a \code{\link{GRanges}} object}
 \usage{
-vcf2ranges(vcfFile = NULL, genotypeField = 1)
+vcf2ranges(vcfFile = NULL, genotypeField = 1, chromosomes = NULL)
 }
 \arguments{
 \item{vcfFile}{VCF file containing phased alleles}

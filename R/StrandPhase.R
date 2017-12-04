@@ -10,7 +10,7 @@
 #' @author David Porubsky
 #' @export
 
-strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
+strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   #=======================
   ### Helper functions ###
@@ -42,7 +42,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   }
   
   ## Put options into list and merge with conf
-  params <- list(numCPU=numCPU, positions=positions, WCregions=WCregions, chromosomes=chromosomes, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq, num.iterations=num.iterations, translateBases=translateBases, fillMissAllele=fillMissAllele, splitPhasedReads=splitPhasedReads, callBreaks=callBreaks, exportVCF=exportVCF, bsGenome=bsGenome)
+  params <- list(numCPU=numCPU, positions=positions, WCregions=WCregions, chromosomes=chromosomes, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq, num.iterations=num.iterations, translateBases=translateBases, fillMissAllele=fillMissAllele, splitPhasedReads=splitPhasedReads, compareSingleCells=compareSingleCells, callBreaks=callBreaks, exportVCF=exportVCF, bsGenome=bsGenome)
   conf <- c(conf, params[setdiff(names(params),names(conf))])
   
   #===================
@@ -85,6 +85,11 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   if (!file.exists(vcf.store)) {
     dir.create(vcf.store)
   }
+  
+  singlecell.store <- file.path(outputfolder, 'SingleCellHaps')
+  if (!file.exists(singlecell.store)) {
+    dir.create(singlecell.store)
+  }
 
   ## export haplotypes
   destination <- file.path(phased.store, 'phased_haps.txt')
@@ -107,7 +112,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   #snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
   snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosomes=conf[['chromosomes']])	
   WC.regions <- read.table(conf[['WCregions']], header=F)
-  #WC.regions <- read.table(conf[['WCregions']], header=F, sep = "\t")
+  #WC.regions <- read.table(conf[['WCregions']], header=F, sep = ":")
   WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))
   
   ## Parallelization ##
@@ -124,54 +129,48 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
       snvs.chr <- snvs[seqnames(snvs) == chr]
       WCregions.chr <- WC.regions[seqnames(WC.regions) == chr]
       
-      if (length(WCregions.chr) == 0) {
-	message("No WC region for chromosome ", chr)		
-	next
+      if (length(WCregions.chr) > 0) {
+        #seqlevels(snvs.chr) <- chr
+        #seqlevels(WCregions.chr) <- chr
+        snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
+        WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
+        #snvs.chr <- keepSeqlevels(snvs.chr, chr)
+        #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
+        
+        tC <- tryCatch({
+          phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], compareSingleCells=conf[['compareSingleCells']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
+        }, error = function(err) {
+          stop(chr,'\n',err)
+        })
+		
+      } else {
+        message("No WC region for chromosome ", chr)	
       }		
-      
-      #seqlevels(snvs.chr) <- chr
-      #seqlevels(WCregions.chr) <- chr
-      snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
-      WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
-      #snvs.chr <- keepSeqlevels(snvs.chr, chr)
-      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
-    
-      tC <- tryCatch({
-        phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
-      }, error = function(err) {
-        stop(chr,'\n',err)
-      })
     }
     stopCluster(cl)
     time <- proc.time() - ptm; message(" ",round(time[3],2),"s")  
+    
   } else {
-    #conf[['numCPU']] <- 1 #if to use only one CPU or CPU argument not defined
-    #temp <- foreach (chr = conf[['chromosomes']], .packages=c('StrandPhaseR')) %dopar% {
+    
     for (chr in conf[['chromosomes']]) {
       chr <- as.character(chr)
       #Select chromosome of interest from the list
       snvs.chr <- snvs[seqnames(snvs) == chr]
       WCregions.chr <- WC.regions[seqnames(WC.regions) == chr]
       
-      if (length(WCregions.chr) == 0) {
-	message("No WC region for chromosome ", chr)		
-	next
-      }	
-      
-      #seqlevels(snvs.chr) <- chr
-      #seqlevels(WCregions.chr) <- chr
-      snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
-      WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
-      #snvs.chr <- keepSeqlevels(snvs.chr, chr)
-      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
-      
-      #if (length(WCregions.chr)==0) {
-      #  message("No WC regions for chromosome ", chr)
-      #  next
-      #}  
+      if (length(WCregions.chr) > 0) {
+        #seqlevels(snvs.chr) <- chr
+        #seqlevels(WCregions.chr) <- chr
+        snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
+        WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
+        #snvs.chr <- keepSeqlevels(snvs.chr, chr)
+        #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
         
-      phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
-
+        phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
+	      
+      }	else {
+        message("No WC region for chromosome ", chr)	
+      }
     }
-  }  
-}
+  } 
+} #end of wrapper function

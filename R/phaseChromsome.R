@@ -17,17 +17,18 @@
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @param min.baseq Minimum base quality to consider a base for phasing.
 #' @param num.iterations Number of iteration to sort watson and crick matrices.
-#' @param translateBases
-#' @param fillGaps 
+#' @param translateBases ...
+#' @param fillGaps ...
 #' @param splitPhasedReads Set to \code{TRUE} if you want to split reads per haplotype.
-#' @param callBreaks
-#' @param exportVCF
+#' @param compareSingleCells ...
+#' @param callBreaks ...
+#' @param exportVCF ...
 #' @param bsGenome A \code{BSgenome} object which contains the refernce DNA sequence
 
 #' @author David Porubsky
 #' @export
 
-phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
+phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   message("Working on chromosome ",chromosome)
   
@@ -40,6 +41,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   data.store <- file.path(outputfolder, 'data')
   browser.store <- file.path(outputfolder, 'browserFiles')
   vcf.store <- file.path(outputfolder, 'VCFfiles')
+  singlecell.store <- file.path(outputfolder, 'SingleCellHaps')
   
   #load data into matrix
   matrices <- loadMatrices(inputfolder=inputfolder, positions=positions, WCregions=WCregions, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq)
@@ -54,6 +56,24 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   if (!is.null(fillMissAllele)) {
      assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
   }
+  
+  #compara single-cell haplotypes to assembled consensus haplotypes
+  if (compareSingleCells) {
+    #compare single cell haplotypes to the consensus haplotypes
+    cell.comparisons.l <- compareSingleCellHaps(consensusHaps=assem.haps, sortedHaps=srt.matrices)
+    destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
+    plotSingleCellHaps(data=cell.comparisons.l, file=destination)
+    #plt.df <- melt(cell.comparisons.l, measure.vars = c('cons1.simil','cons2.simil'))  
+    #plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
+    #destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
+    #suppressMessages( ggsave(destination, plot=plt, device="pdf", width=10, height=length(unique(plt.df$CellID))*0.5, limitsize=F) )
+  
+    #Detect LOH regions
+    LOH.regions <- LOHseeker(data.object=cell.comparisons.l, chromosome=chromosome)
+    LOH.regions.df <- data.frame(LOH.regions)
+    destination <- file.path(singlecell.store, paste0(chromosome, '_singleCell_LOH.txt'))
+    write.table(LOH.regions.df, file = destination, quote = F, row.names = F)
+  }  
   
   #add chromosome name to exported phased files 
   chrName.hap1 <- data.frame(chr=rep(chromosome, nrow(assem.haps$hap1.cons)))
@@ -111,4 +131,5 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
 #   breakpoints <- runBreakpointr(bamfile = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chromosome, windowsize=50, binMethod="reads", pair2frgm=TRUE)	
 #    writeBedFile(index=chromosome, outputDirectory=breakspath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
 #  }
-}
+
+} #end of function
