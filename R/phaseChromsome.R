@@ -78,8 +78,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   hap2.files <- data.frame(names(assem.haps$hap2.files), do.call(rbind, lapply(assem.haps$hap2.files, rbind)))
   names(hap2.files) <- c("Filenames", "Simil", "Disimil")
   write.table(hap2.files, file=destination, row.names = F)
-  destination <- file.path(phased.store, 'phased_haps.txt')
-  write.table(data.frame(assem.haps$assem.haps), file=destination, row.names = F, col.names=F, quote = F, append = T, sep="\t")	    
+  destination <- file.path(phased.store, 'phased_haps.txt')   
 
   if (!is.null(exportVCF) & !is.null(bsGenome)) {		
     exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = assem.haps, bsGenome=bsGenome, chromosome=chromosome)
