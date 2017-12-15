@@ -9,6 +9,8 @@ plotPhasedReads(datapath, plotChromosomes = NULL, file = NULL)
 \arguments{
 \item{datapath}{containing split watson and crick reads per haplotype}
 
+\item{plotChromosomes}{...}
+
 \item{file}{name of the file to save produced plots}
 }
 \description{

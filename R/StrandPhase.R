@@ -10,7 +10,7 @@
 #' @author David Porubsky
 #' @export
 
-strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
+strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   #=======================
   ### Helper functions ###
@@ -110,7 +110,11 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ## Loading in list of SNV positions and locations of WC regions
   #snvs <- read.table(conf[['positions']], header=F)
   #snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
-  snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosomes=conf[['chromosomes']])	
+  snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosomes=conf[['chromosomes']])
+  #vcf <- read.vcfR(file = conf[['positions']], limit = 10000000, convertNA = TRUE, verbose = FALSE)
+  #gt <- extract.gt(vcf)
+  #hets <- is_het(gt)
+  
   WC.regions <- read.table(conf[['WCregions']], header=F)
   #WC.regions <- read.table(conf[['WCregions']], header=F, sep = ":")
   WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))

@@ -1,12 +1,7 @@
 #' This funcion will read in partial single cell haplotypes into
 #' two parallel matrices separately for Watson and Crick reads
 #' 
-#' @param inputfolder
-#' @param positions filename with listed position of SNVs for given chromosome (format: chrName SNVpos)
-#' @param pairedEndReads
-#' @param min.mapq
-#' @param WCregions filename of all WC region for a given chromosome (format: chrName:Start:End:FileName)
-#' @param min.baseq Minimum base quality to consider a base for phasing
+#' @inheritParams phaseChromosome  
 #' @importFrom GenomicAlignments pileLettersAt
 #' @importFrom Biostrings alphabetFrequency DNAStringSet
 #' 

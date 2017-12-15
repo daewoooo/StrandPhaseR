@@ -133,6 +133,7 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
     
     assembled.hap1 <- list()
     assembled.hap2 <- list()
+    assembled.haps <- list()
     for (i in 1:length(hap1.files)) {
       hap1.file <- hap1.files[i]
       hap2.file <- hap2.files[i]
@@ -148,6 +149,15 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
     
     hap1.cons$pos <- hap1.GenomicPos
     hap2.cons$pos <- hap2.GenomicPos
+    
+    phased.info <- unlist(strsplit(hap1.files[i], '__'))
+    ID <- phased.info[1]	
+    hap1.phase <- phased.info[3]	
+    phased.region <- phased.region <-  phased.info[2]
+    phased.region <- unlist(strsplit(phased.region, ':|-'))		
+    hap2.phase <- unlist(strsplit(hap2.files[i], '__'))[3]
+    phase <- paste0(hap1.phase, hap2.phase)
+    assembled.haps[[i]] <- paste(sep = "\t", c("NA", ID, phased.region, phase, 0, 0, 0, 0))		
   }  
   
   assembled.haps <- do.call(rbind, assembled.haps)	  

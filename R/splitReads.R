@@ -2,10 +2,8 @@
 #' specific reads
 #' 
 #' @param data.object containing sorted and filtered watson and crick haplotypes of each single cell along with phase info
-#' @param inputfolder
-#' @param pairedEndReads
-#' @param min.mapq
-#' @param filterAltAlign
+#' @inheritParams bamregion2GRanges
+#' @inheritParams phaseChromosome
 #' 
 #' @author David Porubsky
 #' @export

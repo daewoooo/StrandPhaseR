@@ -1,7 +1,11 @@
 #' This function will take both assembled haplotypes and will try to fill gaps at positions where only one allele is phased
 #' Such position have to be heterozygous so the alternative allele at this position can be reliably distinguished
 #' 
-#' @param todo
+#' @param data.object ...
+#' @param merged.bam ...
+#' @param chunkSize ...
+#' @inheritParams bamregion2GRanges
+#' @inheritParams phaseChromosome
 #' @import GenomicRanges
 #' @importFrom GenomicAlignments pileLettersAt
 #' @importFrom Biostrings DNAStringSet

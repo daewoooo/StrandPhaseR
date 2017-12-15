@@ -1,7 +1,7 @@
 #' This function will take phased reads for each chromosome and plot them 
 #' 
 #' @param datapath containing split watson and crick reads per haplotype
-#' @param plotChromosomes
+#' @param plotChromosomes ...
 #' @param file name of the file to save produced plots
 #' 
 #' @author David Porubsky

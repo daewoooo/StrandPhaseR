@@ -11,7 +11,11 @@ splitReads(data.object = NULL, inputfolder = inputfolder,
 \arguments{
 \item{data.object}{containing sorted and filtered watson and crick haplotypes of each single cell along with phase info}
 
-\item{filterAltAlign}{}
+\item{inputfolder}{Path to the bam files to process}
+
+\item{pairedEndReads}{Set to \code{TRUE} if you have paired-end reads in your file.}
+
+\item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 }
 \description{
 This will take phased info for each haplotype and will split directional reads of each single cell into haplotype
