@@ -138,8 +138,6 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
     hap1.cons$pos <- hap1.GenomicPos
     hap2.cons$pos <- hap2.GenomicPos
   }  
-  
-  assembled.haps <- do.call(rbind, assembled.haps)	  
 
   ## Export data as a single data object (List)
   assem.haps <- list()
