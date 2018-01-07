@@ -45,76 +45,84 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   
   #load data into matrix
   matrices <- loadMatrices(inputfolder=inputfolder, positions=positions, WCregions=WCregions, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq)
-    
-  #phase data
-  srt.matrices <- sortMatrices(matrices, num.iterations=num.iterations)
-    
-  #filter unreliable data
-  assem.haps <- assembleHaps(srt.matrices, translateBases=translateBases)
-    
-  #fill gaps in haplotypes
-  if (!is.null(fillMissAllele)) {
-     assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
-  }
   
-  #compara single-cell haplotypes to assembled consensus haplotypes
-  if (compareSingleCells) {
-    #compare single cell haplotypes to the consensus haplotypes
-    cell.comparisons.l <- compareSingleCellHaps(consensusHaps=assem.haps, sortedHaps=srt.matrices)
-    destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
-    plotSingleCellHaps(data=cell.comparisons.l, file=destination)
-    #plt.df <- melt(cell.comparisons.l, measure.vars = c('cons1.simil','cons2.simil'))  
-    #plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
-    #destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
-    #suppressMessages( ggsave(destination, plot=plt, device="pdf", width=10, height=length(unique(plt.df$CellID))*0.5, limitsize=F) )
+  #Check if sufficient data were loaded
+  if (length(matrices) > 0) {
   
-    #Detect LOH regions
-    LOH.regions <- LOHseeker(data.object=cell.comparisons.l, chromosome=chromosome)
-    LOH.regions.df <- data.frame(LOH.regions)
-    destination <- file.path(singlecell.store, paste0(chromosome, '_singleCell_LOH.txt'))
-    write.table(LOH.regions.df, file = destination, quote = F, row.names = F)
+    #phase data
+    srt.matrices <- sortMatrices(matrices, num.iterations=num.iterations)
+  
+    #filter unreliable data
+    assem.haps <- assembleHaps(srt.matrices, translateBases=translateBases)
+    
+    #fill gaps in haplotypes
+    if (!is.null(fillMissAllele)) {
+      assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
+    }
+  
+  
+    #compara single-cell haplotypes to assembled consensus haplotypes
+    if (compareSingleCells) {
+      #compare single cell haplotypes to the consensus haplotypes
+      cell.comparisons.l <- compareSingleCellHaps(consensusHaps=assem.haps, sortedHaps=srt.matrices)
+      destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
+      plotSingleCellHaps(data=cell.comparisons.l, file=destination)
+      #plt.df <- melt(cell.comparisons.l, measure.vars = c('cons1.simil','cons2.simil'))  
+      #plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
+      #destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
+      #suppressMessages( ggsave(destination, plot=plt, device="pdf", width=10, height=length(unique(plt.df$CellID))*0.5, limitsize=F) )
+  
+      #Detect LOH regions
+      LOH.regions <- LOHseeker(data.object=cell.comparisons.l, chromosome=chromosome)
+      LOH.regions.df <- data.frame(LOH.regions)
+      destination <- file.path(singlecell.store, paste0(chromosome, '_singleCell_LOH.txt'))
+      write.table(LOH.regions.df, file = destination, quote = F, row.names = F)
+    }  
+  
+    #add chromosome name to exported phased files 
+    chrName.hap1 <- data.frame(chr=rep(chromosome, nrow(assem.haps$hap1.cons)))
+    assem.haps$hap1.cons <- cbind(chrName.hap1, assem.haps$hap1.cons)
+    chrName.hap2 <- data.frame(chr=rep(chromosome, nrow(assem.haps$hap2.cons)))
+    assem.haps$hap2.cons <- cbind(chrName.hap2, assem.haps$hap2.cons)	 	
+  
+    #export phased haplotypes
+    destination <- file.path(data.store, paste0(chromosome, '_phased.RData')) #save original data object with sorted matrices
+    save(srt.matrices, file=destination)
+    
+    destination <- file.path(phased.store, paste0(chromosome, '_phased_hap1.txt')) #save phased alleles per haplotype in separate files
+    write.table(assem.haps$hap1.cons, file=destination, row.names = F)
+    destination <- file.path(phased.store, paste0(chromosome, '_phased_hap2.txt'))
+    write.table(assem.haps$hap2.cons, file=destination, row.names = F)
+    
+    destination <- file.path(phased.store, paste0(chromosome, '_phasedFiles_hap1.txt'))
+    hap1.files <- data.frame(names(assem.haps$hap1.files), do.call(rbind, lapply(assem.haps$hap1.files, rbind)))
+    names(hap1.files) <- c("Filenames", "Simil", "Disimil")
+    write.table(hap1.files, file=destination, row.names = F)
+    destination <- file.path(phased.store, paste0(chromosome, '_phasedFiles_hap2.txt'))
+    hap2.files <- data.frame(names(assem.haps$hap2.files), do.call(rbind, lapply(assem.haps$hap2.files, rbind)))
+    names(hap2.files) <- c("Filenames", "Simil", "Disimil")
+    write.table(hap2.files, file=destination, row.names = F)
+    destination <- file.path(phased.store, 'phased_haps.txt')
+    write.table(data.frame(assem.haps$assem.haps), file=destination, row.names = F, col.names=F, quote = F, append = T, sep="\t")	  
+
+    if (!is.null(exportVCF) & !is.null(bsGenome)) {		
+      exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = assem.haps, bsGenome=bsGenome, chromosome=chromosome)
+    }	
+    
+    #split reads per haplotype  
+    if (splitPhasedReads) {
+      haps.gr <- splitReads(data.object=assem.haps, inputfolder=inputfolder, pairedEndReads=pairedEndReads, min.mapq=0, filterAltAlign=FALSE)
+      destination <- file.path(data.store, paste0(chromosome, '_reads.RData'))
+      save(haps.gr, file=destination)
+      
+      exportBedGraph(index=paste0(chromosome, '_hap1'), outputfolder=browser.store, fragments=haps.gr$hap1, col="0,128,255")
+      exportBedGraph(index=paste0(chromosome, '_hap2'), outputfolder=browser.store, fragments=haps.gr$hap2, col="0,255,255")
+    }
+  
+  } else {
+    message(" Insufficient data to assemble haplotypes, skipping ...")
   }  
   
-  #add chromosome name to exported phased files 
-  chrName.hap1 <- data.frame(chr=rep(chromosome, nrow(assem.haps$hap1.cons)))
-  assem.haps$hap1.cons <- cbind(chrName.hap1, assem.haps$hap1.cons)
-  chrName.hap2 <- data.frame(chr=rep(chromosome, nrow(assem.haps$hap2.cons)))
-  assem.haps$hap2.cons <- cbind(chrName.hap2, assem.haps$hap2.cons)	 	
-  
-  #export phased haplotypes
-  destination <- file.path(data.store, paste0(chromosome, '_phased.RData')) #save original data object with sorted matrices
-  save(srt.matrices, file=destination)
-    
-  destination <- file.path(phased.store, paste0(chromosome, '_phased_hap1.txt')) #save phased alleles per haplotype in separate files
-  write.table(assem.haps$hap1.cons, file=destination, row.names = F)
-  destination <- file.path(phased.store, paste0(chromosome, '_phased_hap2.txt'))
-  write.table(assem.haps$hap2.cons, file=destination, row.names = F)
-    
-  destination <- file.path(phased.store, paste0(chromosome, '_phasedFiles_hap1.txt'))
-  hap1.files <- data.frame(names(assem.haps$hap1.files), do.call(rbind, lapply(assem.haps$hap1.files, rbind)))
-  names(hap1.files) <- c("Filenames", "Simil", "Disimil")
-  write.table(hap1.files, file=destination, row.names = F)
-  destination <- file.path(phased.store, paste0(chromosome, '_phasedFiles_hap2.txt'))
-  hap2.files <- data.frame(names(assem.haps$hap2.files), do.call(rbind, lapply(assem.haps$hap2.files, rbind)))
-  names(hap2.files) <- c("Filenames", "Simil", "Disimil")
-  write.table(hap2.files, file=destination, row.names = F)
-  destination <- file.path(phased.store, 'phased_haps.txt')
-  write.table(data.frame(assem.haps$assem.haps), file=destination, row.names = F, col.names=F, quote = F, append = T, sep="\t")	    
-
-  if (!is.null(exportVCF) & !is.null(bsGenome)) {		
-    exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = assem.haps, bsGenome=bsGenome, chromosome=chromosome)
-  }	
-    
-  #split reads per haplotype  
-  if (splitPhasedReads) {
-    haps.gr <- splitReads(data.object=assem.haps, inputfolder=inputfolder, pairedEndReads=pairedEndReads, min.mapq=0, filterAltAlign=FALSE)
-    destination <- file.path(data.store, paste0(chromosome, '_reads.RData'))
-    save(haps.gr, file=destination)
-      
-    exportBedGraph(index=paste0(chromosome, '_hap1'), outputfolder=browser.store, fragments=haps.gr$hap1, col="0,128,255")
-    exportBedGraph(index=paste0(chromosome, '_hap2'), outputfolder=browser.store, fragments=haps.gr$hap2, col="0,255,255")
-  }
-    
   #call BreakPointR on phased reads object
 #  if (callBreaks) {
 #    breakspath <- file.path(outputfolder, 'BreakPointR')

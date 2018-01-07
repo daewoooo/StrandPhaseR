@@ -165,63 +165,70 @@ loadMatrices <- function(inputfolder=NULL, positions=NULL, WCregions=NULL, paire
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   
   ## initialize matrix with all regions as rows and covered SNVs as columns
-  filename.IDs <- names(crick.bases)
-  crickBases.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
-  watsonBases.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
-  crickQuals.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
-  watsonQuals.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
+  if (length(crick.bases) > 0 & length(watson.bases) > 0) {
+    filename.IDs <- names(crick.bases)
+    crickBases.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
+    watsonBases.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
+    crickQuals.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
+    watsonQuals.m <- matrix(NA, nrow = length(filename.IDs), ncol = length(genomic.pos))
   
-  #message("Loading matrices")
+    #message("Loading matrices")
   
-  ## loop over all file/region IDs 
-  for (i in 1:length(filename.IDs)) {
-    #message("Working on ", filename.IDs[i])
-    filename.ID <- filename.IDs[i]
-    crickBases.v <- crick.bases[[filename.ID]]
-    watsonBases.v <- watson.bases[[filename.ID]]
-    crickQuals.v <- crick.quals[[filename.ID]]
-    watsonQuals.v <- watson.quals[[filename.ID]]
+    ## loop over all file/region IDs 
+    for (i in 1:length(filename.IDs)) {
+      #message("Working on ", filename.IDs[i])
+      filename.ID <- filename.IDs[i]
+      crickBases.v <- crick.bases[[filename.ID]]
+      watsonBases.v <- watson.bases[[filename.ID]]
+      crickQuals.v <- crick.quals[[filename.ID]]
+      watsonQuals.v <- watson.quals[[filename.ID]]
   
-    crick.uncov.pos <- setdiff(genomic.pos, crickBases.v)
-    names(crick.uncov.pos) <- rep(0, length(crick.uncov.pos))
-    crickBases <- names( sort(c(crickBases.v, crick.uncov.pos)) )
-    crickQuals <- names( sort(c(crickQuals.v, crick.uncov.pos)) )
+      crick.uncov.pos <- setdiff(genomic.pos, crickBases.v)
+      names(crick.uncov.pos) <- rep(0, length(crick.uncov.pos))
+      crickBases <- names( sort(c(crickBases.v, crick.uncov.pos)) )
+      crickQuals <- names( sort(c(crickQuals.v, crick.uncov.pos)) )
     
-    watson.uncov.pos <- setdiff(genomic.pos, watsonBases.v)
-    names(watson.uncov.pos) <- rep(0, length(watson.uncov.pos))
-    watsonBases <- names( sort(c(watsonBases.v, watson.uncov.pos)) )
-    watsonQuals <- names( sort(c(watsonQuals.v, watson.uncov.pos)) )
+      watson.uncov.pos <- setdiff(genomic.pos, watsonBases.v)
+      names(watson.uncov.pos) <- rep(0, length(watson.uncov.pos))
+      watsonBases <- names( sort(c(watsonBases.v, watson.uncov.pos)) )
+      watsonQuals <- names( sort(c(watsonQuals.v, watson.uncov.pos)) )
     
-    crickBases.m[i,] <- as.numeric(crickBases)
-    watsonBases.m[i,] <- as.numeric(watsonBases)
-    crickQuals.m[i,] <- as.numeric(crickQuals)
-    watsonQuals.m[i,] <- as.numeric(watsonQuals)
-  }
+      crickBases.m[i,] <- as.numeric(crickBases)
+      watsonBases.m[i,] <- as.numeric(watsonBases)
+      crickQuals.m[i,] <- as.numeric(crickQuals)
+      watsonQuals.m[i,] <- as.numeric(watsonQuals)
+    }
   
-  ## sort matrices by the number of covered SNVs (from highest to lowest)
-  cov.pos.crick <- apply(crickBases.m, 1, function(x) length(which(x>0)))
-  cov.pos.watson <- apply(watsonBases.m, 1, function(x) length(which(x>0)))
-  cov <- cov.pos.crick + cov.pos.watson
+    ## sort matrices by the number of covered SNVs (from highest to lowest)
+    cov.pos.crick <- apply(crickBases.m, 1, function(x) length(which(x>0)))
+    cov.pos.watson <- apply(watsonBases.m, 1, function(x) length(which(x>0)))
+    cov <- cov.pos.crick + cov.pos.watson
   
-  ordered.idx <- order(cov, decreasing = T)
+    ordered.idx <- order(cov, decreasing = T)
   
-  if (length(ordered.idx)>1) {
-    crickBases.m <- crickBases.m[ordered.idx,]
-    watsonBases.m <- watsonBases.m[ordered.idx,]
-    crickQuals.m <- crickQuals.m[ordered.idx,]
-    watsonQuals.m <- watsonQuals.m[ordered.idx,]
-    filename.IDs <- filename.IDs[ordered.idx]
-  }
+    if (length(ordered.idx)>1) {
+      crickBases.m <- crickBases.m[ordered.idx,]
+      watsonBases.m <- watsonBases.m[ordered.idx,]
+      crickQuals.m <- crickQuals.m[ordered.idx,]
+      watsonQuals.m <- watsonQuals.m[ordered.idx,]
+      filename.IDs <- filename.IDs[ordered.idx]
+    }
   
-  ## export matrices and file IDs as single list
-  matrices <- list()
-  matrices[['crick.bases']] <- crickBases.m
-  matrices[['watson.bases']] <- watsonBases.m
-  matrices[['crick.quals']] <- crickQuals.m
-  matrices[['watson.quals']] <- watsonQuals.m
-  matrices[['genomic.pos']] <- sort(genomic.pos)
-  matrices[['row.IDs']] <- filename.IDs
-  #matrices[['nonWC.reads']] <- nonWC.grl
+    ## export matrices and file IDs as single list
+    matrices <- list()
+    matrices[['crick.bases']] <- crickBases.m
+    matrices[['watson.bases']] <- watsonBases.m
+    matrices[['crick.quals']] <- crickQuals.m
+    matrices[['watson.quals']] <- watsonQuals.m
+    matrices[['genomic.pos']] <- sort(genomic.pos)
+    matrices[['row.IDs']] <- filename.IDs
+    #matrices[['nonWC.reads']] <- nonWC.grl
   
-  return(matrices)
+    return(matrices)
+    
+  } else {
+    matrices <- list()
+    return(matrices)
+  }   
+  
 }  
