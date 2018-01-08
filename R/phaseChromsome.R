@@ -65,18 +65,21 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     if (compareSingleCells) {
       #compare single cell haplotypes to the consensus haplotypes
       cell.comparisons.l <- compareSingleCellHaps(consensusHaps=assem.haps, sortedHaps=srt.matrices)
-      destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
-      plotSingleCellHaps(data=cell.comparisons.l, file=destination)
       #plt.df <- melt(cell.comparisons.l, measure.vars = c('cons1.simil','cons2.simil'))  
       #plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
       #destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
       #suppressMessages( ggsave(destination, plot=plt, device="pdf", width=10, height=length(unique(plt.df$CellID))*0.5, limitsize=F) )
   
-      #Detect LOH regions
-      LOH.regions <- LOHseeker(data.object=cell.comparisons.l, chromosome=chromosome)
-      LOH.regions.df <- data.frame(LOH.regions)
-      destination <- file.path(singlecell.store, paste0(chromosome, '_singleCell_LOH.txt'))
-      write.table(LOH.regions.df, file = destination, quote = F, row.names = F)
+      if (!is.null(cell.comparisons.l)) {
+        destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
+        plotSingleCellHaps(data=cell.comparisons.l, file=destination)
+        
+        #Detect LOH regions
+        LOH.regions <- LOHseeker(data.object=cell.comparisons.l, chromosome=chromosome)
+        LOH.regions.df <- data.frame(LOH.regions)
+        destination <- file.path(singlecell.store, paste0(chromosome, '_singleCell_LOH.txt'))
+        write.table(LOH.regions.df, file = destination, quote = F, row.names = F)
+      }  
     }  
   
     #add chromosome name to exported phased files 

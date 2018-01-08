@@ -46,59 +46,67 @@ compareSingleCellHaps <- function(consensusHaps=NULL, sortedHaps=NULL, bin.size=
   names(hap1.cons.code) <- hap1.cons$pos
   names(hap2.cons.code) <- hap2.cons$pos
   
-  cell.comparisons <- list()
-  cell.haps.allSNVs <- list()
-  for (i in 1:nrow(hap1.cells.srt)) {
-    cell.hap1 <- hap1.cells.srt[i,]
-    cell.hap2 <- hap2.cells.srt[i,]
-    names(cell.hap1) <- gen.positions
-    names(cell.hap2) <- gen.positions
-    cell.ID <- strsplit(hap1.cells.names[i], split = "\\.")[[1]][1]
-    
-    #filter only covered SNV in a given cell and given haplotype
-    cell.hap1 <- cell.hap1[cell.hap1 != 0]
-    cell.hap2 <- cell.hap2[cell.hap2 != 0]
-    #compara haps per SNV position
-    #cell.hap1.comp <- rep(0, length(cell.hap1))
-    #cell.hap1.comp[ cell.hap1 == hap1.cons.code[names(cell.hap1)] ] <- 1
-    #cell.hap1.comp[ cell.hap1 == hap2.cons.code[names(cell.hap1)] ] <- 2
-    #cell.hap2.comp <- rep(0, length(cell.hap2))
-    #cell.hap2.comp[ cell.hap2 == hap1.cons.code[names(cell.hap2)] ] <- 1
-    #cell.hap2.comp[ cell.hap2 == hap2.cons.code[names(cell.hap2)] ] <- 2
-    
-    #prepara data frame structure to compare single cell haplotypes
-    hap1.comp <- data.frame(cell.hap1=cell.hap1, cons.hap1=hap1.cons.code[names(cell.hap1)], cons.hap2=hap2.cons.code[names(cell.hap1)])
-    hap1.comp <- hap1.comp[complete.cases(hap1.comp),]
-    hap2.comp <- data.frame(cell.hap2=cell.hap2, cons.hap1=hap1.cons.code[names(cell.hap2)], cons.hap2=hap2.cons.code[names(cell.hap2)])
-    hap2.comp <- hap2.comp[complete.cases(hap2.comp),]
-    
-    #per position haplotype comparison
-    #hap1.perPos.comp <- re
-    #hap1.comp$cell.hap1 == hap1.comp$cons.hap1
-    
-    #binned haplotype comparison
-    if (nrow(hap1.comp) >= bin.size) {
-      cons1.simil <- zoo::rollapply(hap1.comp, width = bin.size, by=step, by.column = F, FUN=getSingleCellSimil)
-    } else {
-      cons1.simil <- getSingleCellSimil(hap1.comp)
-    }  
-    
-    if (nrow(hap2.comp) >= bin.size) {
-      cons2.simil <- zoo::rollapply(hap2.comp, width = bin.size, by=step, by.column = F, FUN=getSingleCellSimil) 
-    } else {
-      cons2.simil <- getSingleCellSimil(hap2.comp)
-    }  
-    
-    cons1.simil <- as.data.frame(cons1.simil) 
-    cons2.simil <- as.data.frame(cons2.simil) 
-    cons1.simil$hap <- 'H1'
-    cons2.simil$hap <- 'H2'
-    cell.comp <- rbind(cons1.simil, cons2.simil)
-    cell.comp$CellID <- paste(cell.ID, cell.comp$hap, sep = "_")
-    cell.comparisons[[i]] <- cell.comp
-  }  
-  #cell.comparisons.df <- do.call(rbind, cell.comparisons)
+  #check if there is enough SNV variants to scan single cell haplotypes
+  if (nrow(hap1.cons)>10*bin.size & nrow(hap1.cons)>10*bin.size) {
   
-  time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
-  return(cell.comparisons)
+    cell.comparisons <- list()
+    cell.haps.allSNVs <- list()
+    for (i in 1:nrow(hap1.cells.srt)) {
+      cell.hap1 <- hap1.cells.srt[i,]
+      cell.hap2 <- hap2.cells.srt[i,]
+      names(cell.hap1) <- gen.positions
+      names(cell.hap2) <- gen.positions
+      cell.ID <- strsplit(hap1.cells.names[i], split = "\\.")[[1]][1]
+    
+      #filter only covered SNV in a given cell and given haplotype
+      cell.hap1 <- cell.hap1[cell.hap1 != 0]
+      cell.hap2 <- cell.hap2[cell.hap2 != 0]
+      #compara haps per SNV position
+      #cell.hap1.comp <- rep(0, length(cell.hap1))
+      #cell.hap1.comp[ cell.hap1 == hap1.cons.code[names(cell.hap1)] ] <- 1
+      #cell.hap1.comp[ cell.hap1 == hap2.cons.code[names(cell.hap1)] ] <- 2
+      #cell.hap2.comp <- rep(0, length(cell.hap2))
+      #cell.hap2.comp[ cell.hap2 == hap1.cons.code[names(cell.hap2)] ] <- 1
+      #cell.hap2.comp[ cell.hap2 == hap2.cons.code[names(cell.hap2)] ] <- 2
+    
+      #prepara data frame structure to compare single cell haplotypes
+      hap1.comp <- data.frame(cell.hap1=cell.hap1, cons.hap1=hap1.cons.code[names(cell.hap1)], cons.hap2=hap2.cons.code[names(cell.hap1)])
+      hap1.comp <- hap1.comp[complete.cases(hap1.comp),]
+      hap2.comp <- data.frame(cell.hap2=cell.hap2, cons.hap1=hap1.cons.code[names(cell.hap2)], cons.hap2=hap2.cons.code[names(cell.hap2)])
+      hap2.comp <- hap2.comp[complete.cases(hap2.comp),]
+    
+      #per position haplotype comparison
+      #hap1.perPos.comp <- re
+      #hap1.comp$cell.hap1 == hap1.comp$cons.hap1
+    
+      #binned haplotype comparison
+      if (nrow(hap1.comp) >= bin.size) {
+        cons1.simil <- zoo::rollapply(hap1.comp, width = bin.size, by=step, by.column = F, FUN=getSingleCellSimil)
+      } else {
+        cons1.simil <- getSingleCellSimil(hap1.comp)
+      }  
+    
+      if (nrow(hap2.comp) >= bin.size) {
+        cons2.simil <- zoo::rollapply(hap2.comp, width = bin.size, by=step, by.column = F, FUN=getSingleCellSimil) 
+      } else {
+        cons2.simil <- getSingleCellSimil(hap2.comp)
+      }  
+    
+      cons1.simil <- as.data.frame(cons1.simil) 
+      cons2.simil <- as.data.frame(cons2.simil) 
+      cons1.simil$hap <- 'H1'
+      cons2.simil$hap <- 'H2'
+      cell.comp <- rbind(cons1.simil, cons2.simil)
+      cell.comp$CellID <- paste(cell.ID, cell.comp$hap, sep = "_")
+      cell.comparisons[[i]] <- cell.comp
+    }  
+    
+    time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
+    return(cell.comparisons)
+  
+  } else {
+    message("\n Insufficient SNV density to scan single-cell haplotypes, skipping ...")
+    return(NULL)
+  }    
+  #cell.comparisons.df <- do.call(rbind, cell.comparisons)
 }

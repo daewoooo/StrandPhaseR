@@ -51,8 +51,12 @@ LOHseeker <- function(data.object=NULL, chromosome=NULL, bin.size=10) {
       all.segments[[cell.id]] <- cell.segments
     }  
   }
-  all.segments.gr <- unlist(all.segments)
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
-  return(all.segments.gr)  
+  
+  if (length(all.segments) > 0) {
+    return(unlist(all.segments))
+  } else {
+    return(NULL) 
+  }
 }
