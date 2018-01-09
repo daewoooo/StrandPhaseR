@@ -133,7 +133,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
       snvs.chr <- snvs[seqnames(snvs) == chr]
       WCregions.chr <- WC.regions[seqnames(WC.regions) == chr]
       
-      if (length(WCregions.chr) > 0) {
+      if (length(WCregions.chr) > 0 & length(snvs.chr) > 0) {
         #seqlevels(snvs.chr) <- chr
         #seqlevels(WCregions.chr) <- chr
         snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
@@ -148,7 +148,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         })
 		
       } else {
-        message("No WC region for chromosome ", chr)	
+        message("No SNVs or WC regions for a give chromosome ", chr)
       }		
     }
     stopCluster(cl)
@@ -162,7 +162,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
       snvs.chr <- snvs[seqnames(snvs) == chr]
       WCregions.chr <- WC.regions[seqnames(WC.regions) == chr]
       
-      if (length(WCregions.chr) > 0) {
+      if (length(WCregions.chr) > 0 & length(snvs.chr) > 0) {
         #seqlevels(snvs.chr) <- chr
         #seqlevels(WCregions.chr) <- chr
         snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
@@ -173,7 +173,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
 	      
       }	else {
-        message("No WC region for chromosome ", chr)	
+        message("No SNVs or WC regions for a give chromosome ", chr)	
       }
     }
   } 
