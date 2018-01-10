@@ -64,7 +64,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     #compara single-cell haplotypes to assembled consensus haplotypes
     if (compareSingleCells) {
       #compare single cell haplotypes to the consensus haplotypes
-      cell.comparisons.l <- compareSingleCellHaps(consensusHaps=assem.haps, sortedHaps=srt.matrices)
+      suppressWarnings( cell.comparisons.l <- compareSingleCellHaps(consensusHaps=assem.haps, sortedHaps=srt.matrices) )
       #plt.df <- melt(cell.comparisons.l, measure.vars = c('cons1.simil','cons2.simil'))  
       #plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
       #destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
@@ -72,7 +72,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   
       if (!is.null(cell.comparisons.l)) {
         destination <- file.path(singlecell.store, paste0(chromosome, '_singleCellHaps.pdf'))
-        plotSingleCellHaps(data=cell.comparisons.l, file=destination)
+        suppressWarnings( plotSingleCellHaps(data=cell.comparisons.l, file=destination) )
         
         #Detect LOH regions
         LOH.regions <- LOHseeker(data.object=cell.comparisons.l, chromosome=chromosome)
