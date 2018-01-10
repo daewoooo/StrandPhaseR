@@ -36,3 +36,7 @@ To install the development version from Github, follow the steps given below. Th
 ### Report Errors
 
 If you encounter errors of any kind, please report an [issue here](https://github.com/daewoooo/StrandPhaseR/issues/new).
+
+### NOTE
+
+The latest version of StrandPhaseR includes recent unpublished work. To avoid any conflict of interest please consult usage for publication with the author.
