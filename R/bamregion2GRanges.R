@@ -7,12 +7,13 @@
 #' @param region If only a subset of the genomic regions should be loaded.
 #' @param pairedEndReads Set to \code{TRUE} if you have paired-end reads in your file.
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
-#' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag
+#' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag testPairedEndBam
 #' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last
 #' @author Aaron Taudt, David Porubsky, Ashley Sanders
 #' @export
 
 bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndReads=FALSE, min.mapq=10, filterAltAlign=TRUE) {
+
   ## Check if bamindex exists
   bamindex.raw <- sub('\\.bai$', '', bamindex)
   bamindex <- paste0(bamindex.raw,'.bai')
@@ -20,6 +21,18 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
     bamindex.own <- Rsamtools::indexBam(bamfile)
     warning("Couldn't find BAM index-file ",bamindex,". Creating our own file ",bamindex.own," instead.")
     bamindex <- bamindex.own
+  }
+  
+  ## Check if bam is truly paired ended in case pairedEndReads set to TRUE
+  is.Paired <- Rsamtools::testPairedEndBam(file = bamfile, index = bamindex)
+  if (pairedEndReads) {
+    if (!is.Paired) {
+      stop("You are trying to process single-ended BAM as paired-ended, Please set proper BAM directioanlity!!!")
+    } 
+  } else {
+    if (is.Paired) {
+      stop("You are trying to process paired-ended BAM as single-ended, Please set proper BAM directioanlity!!!")
+    }  
   }
   
   ## read in reads data
