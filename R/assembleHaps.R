@@ -157,7 +157,8 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
     phased.region <- unlist(strsplit(phased.region, ':|-'))		
     hap2.phase <- unlist(strsplit(hap2.files[i], '__'))[3]
     phase <- paste0(hap1.phase, hap2.phase)
-    assembled.haps[[i]] <- paste(sep = "\t", rep("NA", 8))		
+    assembled.haps[[i]] <- paste(sep = "\t", c("NA", ID, phased.region, phase, 0, 0, 0, 0))
+    #assembled.haps[[i]] <- paste(sep = "\t", rep("NA", 8))		
   }  
   
   assembled.haps <- do.call(rbind, assembled.haps)	  
