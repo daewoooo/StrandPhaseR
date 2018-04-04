@@ -81,7 +81,7 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
       phased.info <- unlist(strsplit(hap1.files[i], '__'))
       ID <- phased.info[1]	
       hap1.phase <- phased.info[3]	
-      phased.region <- phased.region <-  phased.info[2]
+      phased.region <-  phased.info[2]
       phased.region <- unlist(strsplit(phased.region, ':|-'))		
       hap2.phase <- unlist(strsplit(hap2.files[i], '__'))[3]
       phase <- paste0(hap1.phase, hap2.phase)
@@ -150,14 +150,17 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
     hap1.cons$pos <- hap1.GenomicPos
     hap2.cons$pos <- hap2.GenomicPos
     
-    phased.info <- unlist(strsplit(hap1.files[i], '__'))
-    ID <- phased.info[1]	
-    hap1.phase <- phased.info[3]	
-    phased.region <- phased.region <-  phased.info[2]
-    phased.region <- unlist(strsplit(phased.region, ':|-'))		
-    hap2.phase <- unlist(strsplit(hap2.files[i], '__'))[3]
-    phase <- paste0(hap1.phase, hap2.phase)
-    assembled.haps[[i]] <- paste(sep = "\t", c("NA", ID, phased.region, phase, 0, 0, 0, 0))
+    for (i in 1:length(hap1.files)) {
+      ## export all phased regions (unfiltered)
+      phased.info <- unlist(strsplit(hap1.files[i], '__'))
+      ID <- phased.info[1]	
+      hap1.phase <- phased.info[3]	
+      phased.region <-  phased.info[2]
+      phased.region <- unlist(strsplit(phased.region, ':|-'))		
+      hap2.phase <- unlist(strsplit(hap2.files[i], '__'))[3]
+      phase <- paste0(hap1.phase, hap2.phase)
+      assembled.haps[[i]] <- paste(sep = "\t", c("NA", ID, phased.region, phase, 0, 0, 0, 0))
+    }
     #assembled.haps[[i]] <- paste(sep = "\t", rep("NA", 8))		
   }  
   
