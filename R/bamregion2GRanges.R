@@ -76,8 +76,8 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
   
   #data <- data[seqnames(data) %in% seqlevels(region)]
   #seqlevels(data) <- seqlevels(region)
-  #data <- keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
-  data <- GenomeInfoDb::keepSeqlevels(data, seqlevels(region))	
+  data <- GenomeInfoDb::keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
+  #data <- GenomeInfoDb::keepSeqlevels(data, seqlevels(region))	
   	
   return(data)
 }
