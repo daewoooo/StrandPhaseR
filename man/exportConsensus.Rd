@@ -19,4 +19,3 @@ This funcion will load sorted watson and crick matrices and will collapsed them 
 \author{
 David Porubsky
 }
-

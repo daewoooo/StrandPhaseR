@@ -18,4 +18,3 @@ Load phased data from RData files
 \author{
 David Porubsky
 }
-

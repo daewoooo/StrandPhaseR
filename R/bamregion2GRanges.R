@@ -48,7 +48,7 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
     data.first <- as(GenomicAlignments::first(data.raw), 'GRanges')
     data.last <- as(GenomicAlignments::last(data.raw), 'GRanges')
     strand(data.last) <- strand(data.first)
-    data <- sort(c(data.first, data.last))
+    data <- GenomicRanges::sort(c(data.first, data.last), ignore.strand=TRUE)
   } else {
     data <- as(data.raw, 'GRanges')
   }
@@ -74,9 +74,10 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
     data <- data[is.na(mcols(data)$XA)]
   }    
   
+  #data <- data[seqnames(data) %in% seqlevels(region)]
   #seqlevels(data) <- seqlevels(region)
-  data <- keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
-  #data <- keepSeqlevels(data, seqlevels(region))	
+  #data <- keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
+  data <- GenomeInfoDb::keepSeqlevels(data, seqlevels(region))	
   	
   return(data)
 }

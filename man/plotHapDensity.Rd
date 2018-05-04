@@ -20,4 +20,3 @@ This function will take phased data for each chromosome and plot density of phas
 \author{
 David Porubsky
 }
-

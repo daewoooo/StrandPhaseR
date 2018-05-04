@@ -19,4 +19,3 @@ Generates a bedgraph from GRanges object in order to upload on to UCSC Genome br
 \author{
 David Porubsky, Ashley Sanders
 }
-

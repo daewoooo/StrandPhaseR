@@ -17,4 +17,3 @@ This function calculates score of a matrix as a sum of partial scores of each co
 \author{
 David Porubsky
 }
-

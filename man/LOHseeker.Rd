@@ -17,4 +17,3 @@ This function uses circular-binary-segementation to segment single cell haplotyp
 \author{
 David Porubsky
 }
-

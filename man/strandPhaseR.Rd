@@ -37,7 +37,7 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
 
-\item{compareSingleCells}{...}
+\item{compareSingleCells}{Set to \code{TRUE} if you want to compare haplotypes at the single-cell level.}
 
 \item{callBreaks}{...}
 
@@ -51,4 +51,3 @@ This function will move through .bam files in a folder and perform several steps
 \author{
 David Porubsky
 }
-

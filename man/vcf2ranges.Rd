@@ -17,4 +17,3 @@ Read VCF file into a \code{\link{GRanges}} object
 \author{
 David Porubsky
 }
-

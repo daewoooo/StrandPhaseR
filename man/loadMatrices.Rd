@@ -28,4 +28,3 @@ two parallel matrices separately for Watson and Crick reads
 \author{
 David Porubsky
 }
-
