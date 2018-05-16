@@ -41,9 +41,11 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
   }
   
   ## Filter duplicates
-  bit.flag <- bitwAnd(1024, data$flag)
-  mask <- bit.flag == 0 	
-  data <- data[mask]	
+  if (pairedEndReads) {
+    bit.flag <- bitwAnd(1024, data$flag)
+    mask <- bit.flag == 0 	
+    data <- data[mask]
+  }  
 
   ## Filter by mapping quality
   if (!is.null(min.mapq)) {
