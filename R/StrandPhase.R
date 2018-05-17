@@ -53,6 +53,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
     warning("VCf file cannot be created because reference genome is NULL")
   }
 
+  conf[['splitPhasedReads']] <- FALSE	
   conf[['fillMissAllele']] <- NULL	
   if (!is.character(conf[['fillMissAllele']]) & !is.null(conf[['fillMissAllele']])) {
     stop("fillMissAllele option takes merged bam file as an argument!!!")
