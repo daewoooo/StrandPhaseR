@@ -27,11 +27,11 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
   is.Paired <- Rsamtools::testPairedEndBam(file = bamfile, index = bamindex)
   if (pairedEndReads) {
     if (!is.Paired) {
-      stop("You are trying to process single-ended BAM as paired-ended, Please set proper BAM directioanlity!!!")
+      warning("You are trying to process single-ended BAM as paired-ended, Please set proper BAM directioanlity!!!")
     } 
   } else {
     if (is.Paired) {
-      stop("You are trying to process paired-ended BAM as single-ended, Please set proper BAM directioanlity!!!")
+      warning("You are trying to process paired-ended BAM as single-ended, Please set proper BAM directioanlity!!!")
     }  
   }
   
