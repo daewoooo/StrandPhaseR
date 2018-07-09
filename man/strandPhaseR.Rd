@@ -23,8 +23,6 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{WCregions}{Filename of all WC region for a given chromosome (format: chrName:Start:End:FileName).}
 
-\item{chromosomes}{If only a subset of the chromosomes should be processed, specify them here.}
-
 \item{pairedEndReads}{Set to \code{TRUE} if you have paired-end reads in your file.}
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}

@@ -4,12 +4,14 @@
 \alias{vcf2ranges}
 \title{Read VCF file into a \code{\link{GRanges}} object}
 \usage{
-vcf2ranges(vcfFile = NULL, genotypeField = 1, chromosomes = NULL)
+vcf2ranges(vcfFile = NULL, genotypeField = 1, chromosome = NULL)
 }
 \arguments{
 \item{vcfFile}{VCF file containing phased alleles}
 
 \item{genotypeField}{In case of multiple samples phased in a single file (Default: 1)}
+
+\item{chromosome}{If only a subset of the chromosomes should be processed, specify them here.}
 }
 \description{
 Read VCF file into a \code{\link{GRanges}} object

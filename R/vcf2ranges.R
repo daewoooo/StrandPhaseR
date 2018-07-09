@@ -2,29 +2,32 @@
 #' 
 #' @param vcfFile VCF file containing phased alleles
 #' @param genotypeField In case of multiple samples phased in a single file (Default: 1)
+#' @inheritParams phaseChromosome 
 #' 
 #' @author David Porubsky
 #' @export
 
-vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosomes=NULL) {
-  vcf <- read.table(vcfFile, stringsAsFactors = F, fill=TRUE)
+vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
+  message("Loading VCF file ...", appendLF=F); ptm <- proc.time()
+  
+  vcf <- read.table(vcfFile, stringsAsFactors = FALSE, fill=TRUE)
   
   #filter chromosomes to use	
-  if (!is.null(chromosomes)) { 	  
-	if ( grepl(vcf$V1[1], pattern = "^chr") & grepl(chromosomes[1], pattern = "^chr") ) {	
-		vcf <- vcf[vcf$V1 %in% chromosomes,]
+  if (!is.null(chromosome)) { 	  
+	if ( grepl(vcf$V1[1], pattern = "^chr") & grepl(chromosome[1], pattern = "^chr") ) {	
+		vcf <- vcf[vcf$V1 %in% chromosome,]
 	} else {
 		stop('Specified chromosomes names do not match VCF chromosome names!!!')
   	}
   }	
 
-  column <- genotypeField + 9
-  vcf <- vcf[,c(1:9, column)]
-  
   #remove indels
   ref.len <- sapply(vcf$V4, nchar, USE.NAMES = F)
   alt.len <- sapply(vcf$V5, nchar, USE.NAMES = F)
-  vcf <- vcf[ref.len == 1 & alt.len == 1,]	
+  vcf <- vcf[ref.len == 1 & alt.len == 1,]
+  
+  column <- genotypeField + 9
+  vcf <- vcf[,c(1:9, column)]
 
   gen.block <- strsplit(as.character(vcf[,10]),':')
   gen.block <- do.call(rbind, gen.block)
@@ -32,10 +35,13 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosomes=NULL) {
   alleles <- do.call(rbind, alleles)
 
   #filter only HET positions
-  mask <- alleles[,1] != alleles[,2]  
-  vcf <- vcf[mask, c(1,2)]
+  mask <- alleles[,1] != alleles[,2]
+  #gen.block <- gen.block[mask,]
+  vcf <- vcf[mask,]
   
-  vcf.gr <- GenomicRanges::GRanges(seqnames=vcf$V1, ranges=IRanges(start=as.numeric(vcf$V2), end=as.numeric(vcf$V2)))
+  #export vcf in GRanges object
+  vcf.gr <- GenomicRanges::GRanges(seqnames=vcf$V1, ranges=IRanges(start=as.numeric(vcf$V2), end=as.numeric(vcf$V2)), ref=vcf$V4, alt=vcf$V5)
   
+  time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   return(vcf.gr)
 }

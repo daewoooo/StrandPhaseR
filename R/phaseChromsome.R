@@ -12,7 +12,7 @@
 #' @param outputfolder Output directory. If non-existent it will be created.
 #' @param positions Filename with listed position of SNVs for given chromosome (format: chrName SNVpos).
 #' @param WCregions Filename of all WC region for a given chromosome (format: chrName:Start:End:FileName).
-#' @param chromosomes If only a subset of the chromosomes should be processed, specify them here.
+#' @param chromosome If only a subset of the chromosomes should be processed, specify them here.
 #' @param pairedEndReads Set to \code{TRUE} if you have paired-end reads in your file.
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @param min.baseq Minimum base quality to consider a base for phasing.
@@ -56,10 +56,14 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     assem.haps <- assembleHaps(srt.matrices, translateBases=translateBases)
     
     #fill gaps in haplotypes
-    if (!is.null(fillMissAllele)) {
+    header <- read.table(fillMissAllele, stringsAsFactors = FALSE, fill=TRUE, comment.char = "&", nrows = 1)
+    if (grepl(header, pattern = "VCF", ignore.case = TRUE)) {
+      assem.haps <- fillGapsWithVCF(data.object=assem.haps, ref.vcf=fillMissAllele, chromosome=chromosome)
+    }
+    
+    if (grepl(fillMissAllele, pattern = "\\.bam$")) {
       assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
     }
-  
   
     #compara single-cell haplotypes to assembled consensus haplotypes
     if (compareSingleCells) {
