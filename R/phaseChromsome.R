@@ -62,7 +62,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     }
     
     if (grepl(fillMissAllele, pattern = "\\.bam$")) {
-      assem.haps <- fillGaps(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
+      assem.haps <- fillGapsWithBam(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
     }
   
     #compara single-cell haplotypes to assembled consensus haplotypes

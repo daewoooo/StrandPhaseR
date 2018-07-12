@@ -13,7 +13,7 @@
 #' @author David Porubsky
 #' @export
 
-fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, translateBases=FALSE, chromosome=NULL, chunkSize=10000000, filterAltAlign=TRUE) {
+fillGapsWithBam <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, translateBases=FALSE, chromosome=NULL, chunkSize=10000000, filterAltAlign=TRUE) {
  
   message(" Filling gaps in haplotypes", appendLF=F); ptm <- proc.time()
   
@@ -21,6 +21,7 @@ fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, transla
   hap2.cons <- data.object[['hap2.cons']]
   assembled.hap1 <- data.object[['hap1.files']]
   assembled.hap2 <- data.object[['hap2.files']]
+  haps <- data.object[['assem.haps']]
   
   cov.both <- intersect(hap1.cons$pos,hap2.cons$pos) #get positions covered on both haplotypes
   
@@ -221,6 +222,7 @@ fillGaps <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, transla
   filled.haps[['hap2.cons']] <- filled.hap2
   filled.haps[['hap1.files']] <- assembled.hap1
   filled.haps[['hap2.files']] <- assembled.hap2
+  filled.haps[['assem.haps']] <- haps
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   return(filled.haps)
@@ -245,6 +247,7 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   hap2.cons <- data.object[['hap2.cons']]
   assembled.hap1 <- data.object[['hap1.files']]
   assembled.hap2 <- data.object[['hap2.files']]
+  haps <- data.object[['assem.haps']]
   
   cov.both <- intersect(hap1.cons$pos,hap2.cons$pos) #get positions covered on both haplotypes
   
@@ -290,6 +293,7 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   filled.haps[['hap2.cons']] <- filled.hap2
   filled.haps[['hap1.files']] <- assembled.hap1
   filled.haps[['hap2.files']] <- assembled.hap2
+  filled.haps[['assem.haps']] <- haps
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   return(filled.haps)
