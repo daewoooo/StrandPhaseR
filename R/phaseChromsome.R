@@ -50,10 +50,10 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   if (length(matrices) > 0) {
   
     #phase data
-    srt.matrices <- sortMatrices(matrices, num.iterations=num.iterations)
+    srt.matrices <- sortMatrices(data.object=matrices, num.iterations=num.iterations)
   
     #filter unreliable data
-    assem.haps <- assembleHaps(srt.matrices, translateBases=translateBases)
+    assem.haps <- assembleHaps(data.object=srt.matrices, translateBases=translateBases)
     
     #fill gaps in haplotypes
     header <- read.table(fillMissAllele, stringsAsFactors = FALSE, fill=TRUE, comment.char = "&", nrows = 1)
@@ -128,6 +128,10 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   
   } else {
     message(" Insufficient data to assemble haplotypes, skipping ...")
+    if (!is.null(exportVCF) & !is.null(bsGenome)) {
+      message(" Printing empty VCF !!!")
+      exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = NULL, bsGenome=bsGenome, chromosome=chromosome)
+    }	
   }  
   
   #call BreakPointR on phased reads object
