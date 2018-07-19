@@ -149,6 +149,10 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
 		
       } else {
         message("No SNVs or WC regions for a give chromosome ", chr)
+        if (!is.null(conf[['exportVCF']]) & !is.null(conf[['bsGenome']])) {
+          message(" Printing empty VCF !!!")
+          exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], chromosome=chr)
+        }	
       }		
     }
     stopCluster(cl)
@@ -173,7 +177,11 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], callBreaks=conf[['callBreaks']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
 	      
       }	else {
-        message("No SNVs or WC regions for a give chromosome ", chr)	
+        message("No SNVs or WC regions for a give chromosome ", chr)
+        if (!is.null(conf[['exportVCF']]) & !is.null(conf[['bsGenome']])) {
+          message(" Printing empty VCF !!!")
+          exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], chromosome=chr)
+        }	
       }
     }
   } 
