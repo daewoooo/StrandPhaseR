@@ -35,7 +35,8 @@ assembleHaps <- function(data.object, translateBases=FALSE) {
   HETpos <- hap1.both[hap1.both$bases != hap2.both$bases,]$pos
   
   #check if the number heterozygous snvs is at least 10% of consensus SNVs from both haplotypes
-  if (length(HETpos) > 0.1*consensus.density) {
+  #and there is at least 5 HET positions in total
+  if (length(HETpos) > 0.1*consensus.density & length(HETpos) >= 5) {
   #if (length(HETpos) >= 10) { #at least 10 overlapping HET positions  
   
     assembled.hap1 <- list()
