@@ -56,15 +56,17 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     assem.haps <- assembleHaps(data.object=srt.matrices, translateBases=translateBases)
     
     #fill gaps in haplotypes
-    header <- read.table(fillMissAllele, stringsAsFactors = FALSE, fill=TRUE, comment.char = "&", nrows = 1)
-    if (grepl(header, pattern = "VCF", ignore.case = TRUE)) {
-      assem.haps <- fillGapsWithVCF(data.object=assem.haps, ref.vcf=fillMissAllele, chromosome=chromosome)
+    if (!is.null(fillMissAllele)) {
+      header <- read.table(fillMissAllele, stringsAsFactors = FALSE, fill=TRUE, comment.char = "&", nrows = 1)
+      if (grepl(header, pattern = "VCF", ignore.case = TRUE)) {
+        assem.haps <- fillGapsWithVCF(data.object=assem.haps, ref.vcf=fillMissAllele, chromosome=chromosome)
+      }
+      
+      if (grepl(fillMissAllele, pattern = "\\.bam$")) {
+        assem.haps <- fillGapsWithBam(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
+      }
     }
-    
-    if (grepl(fillMissAllele, pattern = "\\.bam$")) {
-      assem.haps <- fillGapsWithBam(data.object=assem.haps, merged.bam=fillMissAllele, min.mapq=min.mapq, min.baseq=min.baseq, translateBases=translateBases, chromosome=chromosome)  
-    }
-  
+      
     #compara single-cell haplotypes to assembled consensus haplotypes
     if (compareSingleCells) {
       #compare single cell haplotypes to the consensus haplotypes
