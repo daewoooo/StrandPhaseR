@@ -9,7 +9,7 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
   num.iterations = 2, translateBases = TRUE, fillMissAllele = NULL,
   splitPhasedReads = FALSE, compareSingleCells = FALSE,
-  callBreaks = FALSE, exportVCF = NULL, bsGenome = NULL)
+  exportVCF = NULL, bsGenome = NULL)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
@@ -35,8 +35,6 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
 
 \item{compareSingleCells}{Set to \code{TRUE} if you want to compare haplotypes at the single-cell level.}
-
-\item{callBreaks}{...}
 
 \item{exportVCF}{...}
 

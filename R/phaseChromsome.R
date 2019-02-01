@@ -21,14 +21,13 @@
 #' @param fillGaps ...
 #' @param splitPhasedReads Set to \code{TRUE} if you want to split reads per haplotype.
 #' @param compareSingleCells Set to \code{TRUE} if you want to compare haplotypes at the single-cell level.
-#' @param callBreaks ...
 #' @param exportVCF ...
 #' @param bsGenome A \code{BSgenome} object which contains the refernce DNA sequence
 
 #' @author David Porubsky
 #' @export
 
-phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
+phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   message("Working on chromosome ",chromosome)
   
@@ -120,7 +119,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     
     #split reads per haplotype  
     if (splitPhasedReads) {
-      haps.gr <- splitReads(data.object=assem.haps, inputfolder=inputfolder, pairedEndReads=pairedEndReads, min.mapq=0, filterAltAlign=FALSE)
+      haps.gr <- splitReads(data.object=assem.haps, inputfolder=inputfolder, pairedEndReads=pairedEndReads, min.mapq=10, filterAltAlign=TRUE)
       destination <- file.path(data.store, paste0(chromosome, '_reads.RData'))
       save(haps.gr, file=destination)
       
@@ -134,23 +133,5 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
       message(" Printing empty VCF !!!")
       exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = NULL, bsGenome=bsGenome, chromosome=chromosome)
     }	
-  }  
-  
-  #call BreakPointR on phased reads object
-#  if (callBreaks) {
-#    breakspath <- file.path(outputfolder, 'BreakPointR')
-      
-#    if (!file.exists(breakspath)) {
-#      dir.create(breakspath)
-#    }
-      
-#    hap1 <- haps.gr$hap1
-#    hap2 <- haps.gr$hap2
-#    strand(hap1) <- "-"
-#    strand(hap2) <- "+"
-#    phased.haps <- sort(append(hap1,hap2), ignore.strand=T)
-#   breakpoints <- runBreakpointr(bamfile = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chromosome, windowsize=50, binMethod="reads", pair2frgm=TRUE)	
-#    writeBedFile(index=chromosome, outputDirectory=breakspath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
-#  }
-
+  }
 } #end of function
