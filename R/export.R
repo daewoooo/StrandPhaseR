@@ -157,7 +157,7 @@ exportVCF <- function(index=NULL, outputfolder, phasedHap=NULL, bsGenome, chromo
     alt.alleles <- mapply(collapse.alt, alt.alleles1, alt.alleles2, USE.NAMES = F)
     alt.alleles[alt.alleles == ""] <- "N"
     
-    snv.pos <- as.numeric(format(snv.pos, scientific = FALSE)) #make sure no float numbers in the output
+    snv.pos <- as.integer(format(snv.pos, scientific = FALSE)) #make sure no float numbers in the output
     df <- data.frame(chr, snv.pos, id, ref.alleles, alt.alleles, qual, filter, info, format, genotypes, stringsAsFactors = FALSE)
     
     utils::write.table(df, file=savefile.vcf, row.names=FALSE, col.names=FALSE, quote=FALSE, append=TRUE, sep='\t')
