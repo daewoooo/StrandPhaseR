@@ -6,7 +6,6 @@
 #' 
 #' @author David Porubsky
 #'
-
 plotPhasedReads <- function(datapath, plotChromosomes = NULL, file=NULL) {
   
   RData.objects <- list.files(datapath, pattern="_reads.RData$", full=T)
@@ -46,7 +45,7 @@ plotPhasedReads <- function(datapath, plotChromosomes = NULL, file=NULL) {
 #' @param files A list of files that contain phased data.
 #' @return A list() containing all loaded phased data.
 #' @author David Porubsky
-
+#'
 loadGRangesFromFiles <- function(files) {
 
 	file.list <- files
@@ -68,7 +67,7 @@ loadGRangesFromFiles <- function(files) {
 		return(phasedlist)
 	} else if (is.list(file.list)) {
 		index <- which(unlist(lapply(gr.list, function(hmm) { class(hmm)!='GRanges' })))
-		if (length(index)>0) {
+		if (length(index) > 0) {
 			stop("The following list entries do not contain GRanges objects: ", paste(index, collapse=' '))
 		}
 		return(gr.list)
@@ -84,7 +83,6 @@ loadGRangesFromFiles <- function(files) {
 #' 
 #' @author David Porubsky
 #'
-
 plotHapDensity <- function(datapath, perChromosome=FALSE, file=NULL, HighQual=FALSE) {
 
 	phased.data <- list.files(datapath, pattern="_phased_hap", full=T)	
@@ -116,7 +114,9 @@ plotHapDensity <- function(datapath, perChromosome=FALSE, file=NULL, HighQual=FA
 		dfplt$Filename <- rownames(dfplt)
 		col.num <- floor(sqrt(length(rownames(dfplt))))
 		long.dfplt <- melt(dfplt)
-		ggplt <- ggplot(long.dfplt) + geom_bar(aes(x=variable, y=value), stat="identity") + facet_wrap(~Filename, ncol=col.num)
+		ggplt <- ggplot(long.dfplt) + 
+		  geom_bar(aes(x=variable, y=value), stat="identity") + 
+		  facet_wrap(~Filename, ncol=col.num)
 		if (!is.null(file)) {
 			filetype <- strsplit(file, "\\.")[[1]][2]
 			ggsave(file, ggplt, width=col.num*2 ,height=col.num*2, limitsize=FALSE, device=filetype)
@@ -140,13 +140,102 @@ plotHapDensity <- function(datapath, perChromosome=FALSE, file=NULL, HighQual=FA
 #' 
 #' @author David Porubsky
 #' @export
-
+#'
 plotSingleCellHaps <- function(data, file=NULL) {
   plt.df <- reshape2::melt(data, measure.vars = c('cons1.simil','cons2.simil'))  
-  plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + geom_step()  + facet_grid(CellID ~ .) + theme_bw() + theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
+  plt <- ggplot(plt.df, aes(y=value,x=start, color=variable)) + 
+    geom_step()  + 
+    facet_grid(CellID ~ .) + 
+    theme_bw() + 
+    theme(strip.text.y = element_text(angle=0), axis.ticks.y=element_blank(), axis.text.y=element_blank()) + 
+    scale_color_manual(values = c("darkgoldenrod1", "dodgerblue2"))
   suppressMessages( ggsave(file, plot=plt, device="pdf", width=10, height=length(unique(plt.df$CellID))*0.5, limitsize=F) )
 }
 
+#' Plot inherited haplotype segments as ideogram.
+#' 
+#' This function takes as na input a \code{\link{GRanges-class}} object with genomic positions of each
+#' inherited haplotype block and project them as whole-genome ideogram.
+#' 
+#' @param hapSegm.gr A \code{\link{GRanges-class}} object with regions of each inherited haplotype block
+#' @param layout Set to 'vertical' or 'horizonal' based on desired layout of an resultant ideogram.
+#' @importFrom dplyr "%>%"
+#' @return A \code{ggplot} object.
+#' @author David Porubsky
+#' @export
+#' 
+plotHaploSegs <- function(hapSegm.gr=NULL, layout='vertical') {
+  ## Remove ranges with NA values
+  hapSegm.gr <- hapSegm.gr[!is.na(hapSegm.gr$match)]
+  ## Prepare data for plotting
+  plt.df <- as.data.frame(hapSegm.gr)
+  ## Create unique ID
+  plt.df$ID <- paste0(plt.df$match, ".", plt.df$inherited)
+  ## Set levels for homolog plotting
+  homolog.ids <- unique(plt.df$inherited)
+  plt.df$ymin <- 0
+  plt.df$ymax <- 0
+  plt.df$ymin[plt.df$inherited == homolog.ids[1]] <- 0
+  plt.df$ymax[plt.df$inherited == homolog.ids[1]] <- 2
+  plt.df$ymin[plt.df$inherited == homolog.ids[2]] <- 3
+  plt.df$ymax[plt.df$inherited == homolog.ids[2]] <- 5
+  
+  ## Set plotting themes
+  theme_horizontal <- theme(legend.position ="top", 
+                            axis.text.y=element_blank(), 
+                            strip.text.y = element_text(angle = 180),
+                            axis.ticks.y = element_blank(),
+                            panel.grid.major = element_blank(), 
+                            panel.grid.minor = element_blank(),
+                            panel.background = element_blank())
+  
+  theme_vertical <- theme(legend.position ="top",
+                          axis.line = element_blank(),
+                          axis.text.x=element_blank(), 
+                          axis.ticks.x=element_blank(),   
+                          strip.text.y = element_text(angle = 180),
+                          panel.grid.major = element_blank(), 
+                          panel.grid.minor = element_blank(),
+                          panel.background = element_blank())
+  
+  ## Get chromosome breaks and labels
+  max.len <- signif(max(plt.df$end), digits = 2)
+  breaks <- seq(from = 0, to = max.len, length.out = 6)
+  labels <- breaks / 1000000
+  labels <- paste0(labels, 'Mb')
+  chr.num <- length(unique(plt.df$seqnames))
+  
+  ## Count number of breakpoints per homolog
+  break.count <- plt.df %>% 
+    group_by(inherited, seqnames) %>% 
+    summarise(count=n() - 1) %>% 
+    group_by(inherited) %>% 
+    summarise(count=sum(count))
+  ## Prepare breakpoint annotation
+  break.count.annot <- paste0(break.count$inherited, ": ", break.count$count)
+  #break.count.annot <- as.data.frame(break.count.annot)
+  #break.count.annot$level <- 1:nrow(break.count.annot)
+  break.count.annot <- paste0(break.count.annot, collapse = "\n")
+  
+  if (layout == 'horizontal') {
+    plt <- ggplot(plt.df) + 
+      geom_rect(aes(xmin=start, xmax=end, ymin=ymin, ymax=ymax, fill=ID)) + 
+      facet_grid(seqnames ~ ., switch = 'y') + 
+      scale_fill_manual(values=c("cadetblue3","coral", "dodgerblue4", "firebrick"), name=break.count.annot) +
+      scale_x_continuous(breaks = breaks, labels = labels) +
+      theme_horizontal
+  } else if (layout == 'vertical') {
+    plt <- ggplot(plt.df) + 
+      geom_rect(aes(xmin=ymin, xmax=ymax, ymin=start, ymax=end, fill=ID)) + 
+      facet_grid(. ~ seqnames, switch = 'x') + 
+      scale_fill_manual(values=c("cadetblue3","coral", "dodgerblue4", "firebrick"), name=break.count.annot) + 
+      scale_y_continuous(breaks = breaks, labels = labels) +
+      theme_vertical
+  } else {
+    message("Unsupported layout!!! Please choose from 'horizontal' or 'vertical'.")
+  }
+  return(plt)
+}
 
 
     
