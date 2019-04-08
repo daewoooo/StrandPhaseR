@@ -14,7 +14,7 @@ Under the development.
 ### Development version from Github
 To install the development version from Github, follow the steps given below. The installation has only been tested on Ubuntu so far, if you need to install on Windows or Mac additional steps might be necessary (e.g. installation of Rtools from https://cran.r-project.org/bin/windows/Rtools/)
 
-1. Install a recent version of R (>=3.2.0) from https://www.r-project.org/
+1. Install a recent version of R (>=3.3.0) from https://www.r-project.org/
 2. Optional: For ease of use, install Rstudio from https://www.rstudio.com/
 3. Open R and install all dependencies. Please ensure that you have writing permissions to install packages. Execute the following lines one by one:
 
@@ -30,7 +30,7 @@ To install the development version from Github, follow the steps given below. Th
 ## How to use StrandPhaseR
 
 1. Start Rstudio
-2. Load StrandPhaseR package: 	library('StrandPhaseR')
+2. Load StrandPhaseR package:	library('StrandPhaseR')
 3. Run StrandPhaseR: 	strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, chromosomes = <chromosomes2analyze>) or use config file as follows strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, configfile = <config_file>)
 
 ### Report Errors
