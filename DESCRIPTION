@@ -17,6 +17,7 @@ Imports:
   Rsamtools,
   Biostrings,
   GenomicAlignments,
+  VariantAnnotation,
   grid,
   S4Vectors,
   GenomeInfoDb,
