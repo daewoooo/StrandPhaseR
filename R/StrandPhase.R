@@ -131,10 +131,10 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
 	next
       }		
       
-      #seqlevels(snvs.chr) <- chr
-      #seqlevels(WCregions.chr) <- chr
-      snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
-      WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
+      seqlevels(snvs.chr) <- chr
+      seqlevels(WCregions.chr) <- chr
+      #snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
+      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
       #snvs.chr <- keepSeqlevels(snvs.chr, chr)
       #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
     
@@ -160,10 +160,10 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
 	next
       }	
       
-      #seqlevels(snvs.chr) <- chr
-      #seqlevels(WCregions.chr) <- chr
-      snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
-      WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
+      seqlevels(snvs.chr) <- chr
+      seqlevels(WCregions.chr) <- chr
+      #snvs.chr <- keepSeqlevels(snvs.chr, chr, pruning.mode="coarse")
+      #WCregions.chr <- keepSeqlevels(WCregions.chr, chr, pruning.mode="coarse")
       #snvs.chr <- keepSeqlevels(snvs.chr, chr)
       #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
       
