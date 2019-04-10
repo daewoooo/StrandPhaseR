@@ -8,8 +8,7 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   positions = NULL, WCregions = NULL, chromosome = NULL,
   pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
   num.iterations = 2, translateBases = TRUE, fillMissAllele = NULL,
-  splitPhasedReads = FALSE, callBreaks = FALSE, exportVCF = NULL,
-  bsGenome = NULL)
+  splitPhasedReads = FALSE, exportVCF = NULL, bsGenome = NULL)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
@@ -49,4 +48,3 @@ This function will move through .bam files in a folder and perform several steps
 \author{
 David Porubsky
 }
-

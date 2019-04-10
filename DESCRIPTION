@@ -16,7 +16,11 @@ Imports:
   IRanges,
   Rsamtools,
   Biostrings,
+  S4Vectors,
+  GenomeInfoDb (>= 1.12.3),
   GenomicAlignments,
+  doParallel,
+  foreach,
   grid,
   gtools
 Suggests:
@@ -25,4 +29,4 @@ Suggests:
 License: 
 LazyLoad: yes
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.0

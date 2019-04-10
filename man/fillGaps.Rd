@@ -16,4 +16,3 @@ Such position have to be heterozygous so the alternative allele at this position
 \author{
 David Porubsky
 }
-

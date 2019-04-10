@@ -24,4 +24,3 @@ Generates a VCF file from phased haplotypes
 \author{
 David Porubsky, Ashley Sanders
 }
-

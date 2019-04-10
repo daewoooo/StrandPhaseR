@@ -20,14 +20,13 @@
 #' @param translateBases
 #' @param fillGaps 
 #' @param splitPhasedReads Set to \code{TRUE} if you want to split reads per haplotype.
-#' @param callBreaks
 #' @param exportVCF
 #' @param bsGenome A \code{BSgenome} object which contains the refernce DNA sequence
 
 #' @author David Porubsky
 #' @export
 
-phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, callBreaks=FALSE, exportVCF=NULL, bsGenome=NULL) {
+phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   message("Working on chromosome ",chromosome)
   
@@ -93,21 +92,4 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     exportBedGraph(index=paste0(chromosome, '_hap1'), outputfolder=browser.store, fragments=haps.gr$hap1, col="0,128,255")
     exportBedGraph(index=paste0(chromosome, '_hap2'), outputfolder=browser.store, fragments=haps.gr$hap2, col="0,255,255")
   }
-    
-  #call BreakPointR on phased reads object
-#  if (callBreaks) {
-#    breakspath <- file.path(outputfolder, 'BreakPointR')
-      
-#    if (!file.exists(breakspath)) {
-#      dir.create(breakspath)
-#    }
-      
-#    hap1 <- haps.gr$hap1
-#    hap2 <- haps.gr$hap2
-#    strand(hap1) <- "-"
-#    strand(hap2) <- "+"
-#    phased.haps <- sort(append(hap1,hap2), ignore.strand=T)
-#   breakpoints <- runBreakpointr(bamfile = phased.haps, pairedEndReads=pairedEndReads, chromosomes=chromosome, windowsize=50, binMethod="reads", pair2frgm=TRUE)	
-#    writeBedFile(index=chromosome, outputDirectory=breakspath, fragments=breakpoints$fragments, deltaWs=breakpoints$deltas, breakTrack=breakpoints$breaks)
-#  }
 }

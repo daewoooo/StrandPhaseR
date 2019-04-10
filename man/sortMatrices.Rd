@@ -19,4 +19,3 @@ of each single cell
 \author{
 David Porubsky
 }
-

@@ -17,4 +17,3 @@ Write an StrandPhaseR configuration file from a list structure.
 \author{
 Aaron Taudt, David Porubsky
 }
-

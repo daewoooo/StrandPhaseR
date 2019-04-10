@@ -17,4 +17,3 @@ This function will take phased reads for each chromosome and plot them
 \author{
 David Porubsky
 }
-

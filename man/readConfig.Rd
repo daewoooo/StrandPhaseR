@@ -15,4 +15,3 @@ Read an StrandPhaseR configuration file into a list structure. The configuration
 \author{
 Aaron Taudt, David Porubsky
 }
-

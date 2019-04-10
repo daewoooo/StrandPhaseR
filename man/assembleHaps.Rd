@@ -17,4 +17,3 @@ accurate haplotypes
 \author{
 David Porubsky
 }
-
