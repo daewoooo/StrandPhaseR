@@ -18,6 +18,7 @@ Imports:
   Biostrings,
   GenomicAlignments,
   VariantAnnotation,
+  tidyr,
   grid,
   S4Vectors,
   GenomeInfoDb,
