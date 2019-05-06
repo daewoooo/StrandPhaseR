@@ -18,15 +18,6 @@
 #' 
 mapRecomb <- function(parent1=NULL, parent2=NULL, child=NULL, genome='hg38', method='CBS', minSeg=100, smooth=3, collapse.amb=TRUE) {
   
-  ## Helper function
-  switchValue <- function(x) {
-    if (x == 1) {
-      x <- 0
-    } else {
-      x <- 1  
-    } 
-  }
-  
   ## Load VCF files
   if (!is.null(parent1) & file.exists(parent1)) {
     par1 <- vcf2vranges(vcfFile = parent1, genoField = 'GT', translateBases = TRUE, genome = genome)
