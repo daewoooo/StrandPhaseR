@@ -26,7 +26,8 @@ Imports:
   doParallel,
   foreach,
   zoo,
-  fastseg
+  fastseg,
+  tidyr
 Suggests:
   knitr,
   testthat

@@ -5,7 +5,7 @@
 \title{Load a VCF file}
 \usage{
 vcf2vranges(vcfFile = NULL, genoField = NULL, translateBases = TRUE,
-  genome = "hg38")
+  genome = "hg38", phased = TRUE)
 }
 \arguments{
 \item{vcfFile}{A path to a VCF file to be loaded.}
@@ -15,6 +15,8 @@ vcf2vranges(vcfFile = NULL, genoField = NULL, translateBases = TRUE,
 \item{translateBases}{Set to \code{TRUE} if REF and ALT alleles should be reported as A,C,G or T.}
 
 \item{genome}{A reference genome used by \code{readVcfAsVRanges} function. [e.g. 'hg38' - human]}
+
+\item{phased}{If set to \code{TRUE} all unphased variants are removed.}
 }
 \value{
 A \code{\link{VRanges-class}} object.
