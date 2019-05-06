@@ -54,13 +54,14 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
 #' @param genoField A vector of genotype IDs to be loaded from VCF [e.g. 'GT']
 #' @param translateBases Set to \code{TRUE} if REF and ALT alleles should be reported as A,C,G or T.
 #' @param genome A reference genome used by \code{readVcfAsVRanges} function. [e.g. 'hg38' - human]
+#' @param phased If set to \code{TRUE} all unphased variants are removed.
 #' @importFrom tidyr separate
 #' @importFrom VariantAnnotation readVcfAsVRanges
 #' @return A \code{\link{VRanges-class}} object.
 #' @author David Porubsky
 #' @export
 #' 
-vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38') {
+vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38', phased=TRUE) {
   ## Load vcf file into vranges object
   if (all(is.character(genoField) & nchar(genoField) > 0)) {
     suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
@@ -68,6 +69,11 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   } else {
     suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
                                                                          param = ScanVcfParam(fixed=c('ALT'), info = NA)) )
+  }
+  ## Remove unhased variants
+  if (phased) {
+    mask <- grepl(vcf.vranges$GT, pattern = "\\/")
+    vcf.vranges <- vcf.vranges[!mask]
   }
   ## Split genotype field into hapltypes
   gen.field <-  tidyr::separate(data = as(mcols(vcf.vranges), 'data.frame'), col = GT, into = c("H1", "H2"))
@@ -86,5 +92,8 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   }
   ## Construct final VRanges object
   mcols(vcf.vranges) <- gen.field
+  ## Keep only seqlevels present in the final VRanges object
+  vcf.vranges <- keepSeqlevels(vcf.vranges, value = runValue(seqnames(vcf.vranges)))
+  
   return(vcf.vranges)
 } 
