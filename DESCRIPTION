@@ -17,17 +17,13 @@ Imports:
   Rsamtools,
   Biostrings,
   GenomicAlignments,
-  VariantAnnotation,
-  tidyr,
   grid,
   S4Vectors,
   GenomeInfoDb,
   BiocGenerics,
   gtools,
   doParallel,
-  foreach,
-  zoo,
-  fastseg
+  foreach
 Suggests:
   knitr,
   testthat
@@ -36,4 +32,4 @@ LazyLoad: yes
 VignetteBuilder: knitr
 biocViews: Software, Sequencing, Haplotyping
 URL: https://github.com/daewoooo/StrandPhaseR
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
