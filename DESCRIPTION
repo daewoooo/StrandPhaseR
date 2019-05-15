@@ -23,7 +23,8 @@ Imports:
   BiocGenerics,
   gtools,
   doParallel,
-  foreach
+  foreach,
+  fastseg
 Suggests:
   knitr,
   testthat
