@@ -5,7 +5,7 @@
 \title{Load a VCF file}
 \usage{
 vcf2vranges(vcfFile = NULL, genoField = NULL, translateBases = TRUE,
-  genome = "hg38", phased = TRUE)
+  genome = "hg38", phased = FALSE, region = NULL)
 }
 \arguments{
 \item{vcfFile}{A path to a VCF file to be loaded.}
@@ -17,6 +17,8 @@ vcf2vranges(vcfFile = NULL, genoField = NULL, translateBases = TRUE,
 \item{genome}{A reference genome used by \code{readVcfAsVRanges} function. [e.g. 'hg38' - human]}
 
 \item{phased}{If set to \code{TRUE} all unphased variants are removed.}
+
+\item{region}{A \code{\link{GRanges}} obejct of genomic regions to be loaded from input VCF file.}
 }
 \value{
 A \code{\link{VRanges-class}} object.

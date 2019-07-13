@@ -55,21 +55,32 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
 #' @param translateBases Set to \code{TRUE} if REF and ALT alleles should be reported as A,C,G or T.
 #' @param genome A reference genome used by \code{readVcfAsVRanges} function. [e.g. 'hg38' - human]
 #' @param phased If set to \code{TRUE} all unphased variants are removed.
+#' @param region A \code{\link{GRanges}} obejct of genomic regions to be loaded from input VCF file.
 #' @importFrom tidyr separate
 #' @importFrom VariantAnnotation readVcfAsVRanges
 #' @return A \code{\link{VRanges-class}} object.
 #' @author David Porubsky
 #' @export
 #' 
-vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38', phased=TRUE) {
+vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38', phased=FALSE, region=NULL) {
   ## Load vcf file into vranges object
-  if (all(is.character(genoField) & nchar(genoField) > 0)) {
-    suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
-                                                                         param = ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField)) )
+  if (!is.null(region)) {
+    if (all(is.character(genoField) & nchar(genoField) > 0)) {
+      suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
+                                                                           param = ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField, which = region)) )
+    } else {
+      suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
+                                                                           param = ScanVcfParam(fixed=c('ALT'), info = NA, which = region)) )
+    }
   } else {
-    suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
-                                                                         param = ScanVcfParam(fixed=c('ALT'), info = NA)) )
-  }
+    if (all(is.character(genoField) & nchar(genoField) > 0)) {
+      suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
+                                                                           param = ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField)) )
+    } else {
+      suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
+                                                                           param = ScanVcfParam(fixed=c('ALT'), info = NA)) )
+    }
+  }  
   ## Remove unhased variants
   if (phased) {
     mask <- grepl(vcf.vranges$GT, pattern = "\\/")
@@ -90,6 +101,11 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
     gen.field$H1 <- allele1
     gen.field$H2 <- allele2
   }
+  
+  if (!phased) {
+    colnames(gen.field) <- c('allele1', 'allele2')
+  }
+  
   ## Construct final VRanges object
   mcols(vcf.vranges) <- gen.field
   ## Keep only seqlevels present in the final VRanges object

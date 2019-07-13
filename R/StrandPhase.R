@@ -108,9 +108,12 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   }
   
   ## Loading in list of SNV positions and locations of WC regions
-  #snvs <- read.table(conf[['positions']], header=F)
-  #snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
-  snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosome=conf[['chromosomes']])
+  if (grepl(conf[['positions']], pattern = "\\.vcf", ignore.case = TRUE)) {
+    snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosome=conf[['chromosomes']])
+  } else {  
+    snvs <- read.table(conf[['positions']], header=F)
+    snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
+  }
   #vcf <- read.vcfR(file = conf[['positions']], limit = 10000000, convertNA = TRUE, verbose = FALSE)
   #gt <- extract.gt(vcf)
   #hets <- is_het(gt)
