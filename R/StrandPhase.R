@@ -6,6 +6,7 @@
 #' @inheritParams phaseChromosome
 #' @import foreach
 #' @import doParallel 
+#' @importFrom Rsamtools scanBamHeader
 
 #' @author David Porubsky
 #' @export
@@ -39,6 +40,14 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ## Convert BSgenome to string if necessary
   if (class(bsGenome)=='BSgenome') {
     bsGenome <- attributes(bsGenome)$pkgname
+  }
+  
+  ## If parameter chromosomes is not defined process all chromosomes present in BAM files
+  if (is.null(chromosomes)) {
+    bamFile <- list.files(inputfolder, pattern = ".bam$", full.names = TRUE)[1]
+    file.header <- Rsamtools::scanBamHeader(bamFile)[[1]]
+    chrom.lengths <- file.header$targets
+    chromosomes <- names(chrom.lengths)
   }
   
   ## Put options into list and merge with conf
