@@ -4,8 +4,8 @@
 \alias{exportVCF}
 \title{Generates a VCF file from phased haplotypes}
 \usage{
-exportVCF(index = NULL, outputfolder, phasedHap = NULL, bsGenome,
-  chromosome = chr)
+exportVCF(index = NULL, outputfolder = NULL, phasedHap = NULL,
+  positions = NULL, bsGenome = NULL, chromosome = NULL)
 }
 \arguments{
 \item{index}{Unique identifier used to index analyzed individual/sample}
@@ -14,7 +14,9 @@ exportVCF(index = NULL, outputfolder, phasedHap = NULL, bsGenome,
 
 \item{phasedHap}{Data object containing phased haplotypes}
 
-\item{bsGenome}{A \code{BSgenome} object which contains reference genome usedto infer reference bases}
+\item{positions}{Set of heterozygous SNV positions used for phasing obtained from an input VCF files.}
+
+\item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
 
 \item{chromosome}{Name of the chromosome for which we want to export vcf file}
 }
@@ -22,5 +24,5 @@ exportVCF(index = NULL, outputfolder, phasedHap = NULL, bsGenome,
 Generates a VCF file from phased haplotypes
 }
 \author{
-David Porubsky, Ashley Sanders
+David Porubsky
 }

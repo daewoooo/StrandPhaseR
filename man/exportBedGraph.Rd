@@ -18,5 +18,5 @@ exportBedGraph(index, outputfolder, fragments = NULL,
 Generates a bedgraph from GRanges object in order to upload on to UCSC Genome browser
 }
 \author{
-David Porubsky, Ashley Sanders
+David Porubsky
 }

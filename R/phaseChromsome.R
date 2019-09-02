@@ -114,8 +114,10 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     write.table(data.frame(assem.haps$assem.haps), file=destination, row.names = F, col.names=F, quote = F, append = T, sep="\t")	  
 
     if (!is.null(exportVCF) & !is.null(bsGenome)) {		
-      exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = assem.haps, bsGenome=bsGenome, chromosome=chromosome)
-    }	
+      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, bsGenome=bsGenome, chromosome=chromosome)
+    }	else if (!is.null(exportVCF) & is.null(bsGenome)) {
+      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, positions=positions, chromosome=chromosome)
+    }
     
     #split reads per haplotype  
     if (splitPhasedReads) {
