@@ -17,24 +17,25 @@
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @param min.baseq Minimum base quality to consider a base for phasing.
 #' @param num.iterations Number of iteration to sort watson and crick matrices.
-#' @param translateBases ...
 #' @param fillGaps ...
 #' @param splitPhasedReads Set to \code{TRUE} if you want to split reads per haplotype.
 #' @param compareSingleCells Set to \code{TRUE} if you want to compare haplotypes at the single-cell level.
 #' @param exportVCF ...
-#' @param bsGenome A \code{BSgenome} object which contains the refernce DNA sequence
+#' @inheritParams exportConsensus
+#' @inheritParams exportVCF
+#' @inheritParams assembleHaps
 
 #' @author David Porubsky
 #' @export
 
-phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL) {
+phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, concordance=0.9, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   message("Working on chromosome ",chromosome)
   
   ## Check user input
-  if (!is.null(exportVCF) & is.null(bsGenome)) {
-    warning("VCf file cannot be created because reference genome is NULL")
-  }	
+  #if (!is.null(exportVCF) & is.null(bsGenome)) {
+  #  warning("VCf file cannot be created because reference genome is NULL")
+  #}	
   
   phased.store <- file.path(outputfolder, 'Phased')
   data.store <- file.path(outputfolder, 'data')
@@ -52,7 +53,7 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
     srt.matrices <- sortMatrices(data.object=matrices, num.iterations=num.iterations)
   
     #filter unreliable data
-    assem.haps <- assembleHaps(data.object=srt.matrices, translateBases=translateBases)
+    assem.haps <- assembleHaps(data.object=srt.matrices, translateBases=translateBases, concordance=concordance)
     
     #fill gaps in haplotypes
     if (!is.null(fillMissAllele)) {

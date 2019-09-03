@@ -11,7 +11,7 @@
 #' @author David Porubsky
 #' @export
 
-strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=20, num.iterations=2, translateBases=TRUE, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL) {
+strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=20, num.iterations=2, translateBases=TRUE, concordance=0.9, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL) {
   
   #=======================
   ### Helper functions ###
@@ -51,16 +51,16 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   }
   
   ## Put options into list and merge with conf
-  params <- list(numCPU=numCPU, positions=positions, WCregions=WCregions, chromosomes=chromosomes, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq, num.iterations=num.iterations, translateBases=translateBases, fillMissAllele=fillMissAllele, splitPhasedReads=splitPhasedReads, compareSingleCells=compareSingleCells, exportVCF=exportVCF, bsGenome=bsGenome)
+  params <- list(numCPU=numCPU, positions=positions, WCregions=WCregions, chromosomes=chromosomes, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq, num.iterations=num.iterations, translateBases=translateBases, concordance=concordance, fillMissAllele=fillMissAllele, splitPhasedReads=splitPhasedReads, compareSingleCells=compareSingleCells, exportVCF=exportVCF, bsGenome=bsGenome)
   conf <- c(conf, params[setdiff(names(params),names(conf))])
   
   #===================
   ### Input checks ###
   #===================
   ## Check user input
-  if (!is.null(conf[['exportVCF']]) & is.null(conf[['bsGenome']])) {
-    warning("VCf file cannot be created because reference genome is NULL")
-  }
+  #if (!is.null(conf[['exportVCF']]) & is.null(conf[['bsGenome']])) {
+  #  warning("VCf file cannot be created because reference genome is NULL")
+  #}
 
   if (!is.character(conf[['fillMissAllele']]) & !is.null(conf[['fillMissAllele']])) {
     stop("fillMissAllele option takes merged bam file as an argument!!!")
@@ -154,7 +154,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
         
         tC <- tryCatch({
-          phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
+          phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], concordance=conf[['concordance']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
         }, error = function(err) {
           stop(chr,'\n',err)
         })
@@ -186,7 +186,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         #snvs.chr <- keepSeqlevels(snvs.chr, chr)
         #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
         
-        phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
+        phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], concordance=conf[['concordance']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
 	      
       }	else {
         message("No SNVs or WC regions for a give chromosome ", chr)

@@ -7,9 +7,9 @@
 phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   positions = NULL, WCregions = NULL, chromosome = NULL,
   pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
-  num.iterations = 2, translateBases = TRUE, fillMissAllele = NULL,
-  splitPhasedReads = FALSE, compareSingleCells = FALSE,
-  exportVCF = NULL, bsGenome = NULL)
+  num.iterations = 2, translateBases = TRUE, concordance = 0.9,
+  fillMissAllele = NULL, splitPhasedReads = FALSE,
+  compareSingleCells = FALSE, exportVCF = NULL, bsGenome = NULL)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
@@ -30,7 +30,9 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{num.iterations}{Number of iteration to sort watson and crick matrices.}
 
-\item{translateBases}{...}
+\item{translateBases}{translates integer coded bases (1,2,3,4) into letters (A,C,G,T)}
+
+\item{concordance}{Level of agreement between single cell and consensus haplotypes}
 
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
 
@@ -38,7 +40,7 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{exportVCF}{...}
 
-\item{bsGenome}{A \code{BSgenome} object which contains the refernce DNA sequence}
+\item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
 
 \item{fillGaps}{...}
 }

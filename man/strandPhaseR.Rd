@@ -8,7 +8,7 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
   configfile = NULL, numCPU = 1, positions = NULL,
   WCregions = NULL, chromosomes = NULL, pairedEndReads = TRUE,
   min.mapq = 10, min.baseq = 20, num.iterations = 2,
-  translateBases = TRUE, fillMissAllele = NULL,
+  translateBases = TRUE, concordance = 0.9, fillMissAllele = NULL,
   splitPhasedReads = FALSE, compareSingleCells = FALSE,
   exportVCF = NULL, bsGenome = NULL)
 }
@@ -31,7 +31,9 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{num.iterations}{Number of iteration to sort watson and crick matrices.}
 
-\item{translateBases}{...}
+\item{translateBases}{translates integer coded bases (1,2,3,4) into letters (A,C,G,T)}
+
+\item{concordance}{Level of agreement between single cell and consensus haplotypes}
 
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
 
@@ -39,7 +41,7 @@ strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{exportVCF}{...}
 
-\item{bsGenome}{A \code{BSgenome} object which contains the refernce DNA sequence}
+\item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
 }
 \description{
 This function will move through .bam files in a folder and perform several steps (see Details).

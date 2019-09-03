@@ -18,7 +18,7 @@ fillGapsWithBam(data.object, merged.bam, min.mapq = 10, min.baseq = 30,
 
 \item{min.baseq}{Minimum base quality to consider a base for phasing.}
 
-\item{translateBases}{...}
+\item{translateBases}{translates integer coded bases (1,2,3,4) into letters (A,C,G,T)}
 
 \item{chromosome}{If only a subset of the chromosomes should be processed, specify them here.}
 
