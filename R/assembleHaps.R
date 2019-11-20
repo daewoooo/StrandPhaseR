@@ -94,34 +94,47 @@ assembleHaps <- function(data.object, translateBases=FALSE, concordance=0.9) {
       diff.level.hap1 <- ((abs(hap1.cis.concordance - hap1.trans.concordance))/(hap1.cis.concordance + hap1.trans.concordance)/2)*100
       diff.level.hap2 <- ((abs(hap2.cis.concordance - hap2.trans.concordance))/(hap2.cis.concordance + hap2.trans.concordance)/2)*100
     
-      if (diff.level.hap1 > 25 & hap1.cis.concordance > concordance & nrow(hap1.cell.HET) > 0) {
-        hap1.file <- hap1.files[i]
-        assembled.hap1[[hap1.file]] <- c(hap1.cis.concordance, hap1.trans.concordance)  
-      } else {
+      hap1.file <- hap1.files[i]
+      assembled.hap1[[hap1.file]] <- c(hap1.cis.concordance, hap1.trans.concordance)  
+      hap2.file <- hap2.files[i]
+      assembled.hap2[[hap2.file]] <- c(hap2.cis.concordance, hap2.trans.concordance)  
+      
+      if (diff.level.hap1 < 25 | hap1.cis.concordance < concordance | nrow(hap1.cell.HET) == 0) {
+      #if (!diff.level.hap1 > 25 & hap1.cis.concordance > concordance & nrow(hap1.cell.HET) > 0) {
+      #  hap1.file <- hap1.files[i]
+      #  assembled.hap1[[hap1.file]] <- c(hap1.cis.concordance, hap1.trans.concordance)  
+      #} else {
         mask.hap1 <- c(mask.hap1, i)
       }
     
-      if (diff.level.hap2 > 25 & hap2.cis.concordance > concordance & nrow(hap2.cell.HET) > 0) {
-        hap2.file <- hap2.files[i]
-        assembled.hap2[[hap2.file]] <- c(hap2.cis.concordance, hap2.trans.concordance)  
-      } else {
+      #if (diff.level.hap2 > 25 & hap2.cis.concordance > concordance & nrow(hap2.cell.HET) > 0) {
+      if (diff.level.hap2 < 25 | hap2.cis.concordance < concordance | nrow(hap2.cell.HET) == 0) {
+      #  hap2.file <- hap2.files[i]
+      #  assembled.hap2[[hap2.file]] <- c(hap2.cis.concordance, hap2.trans.concordance)  
+      #} else {
         mask.hap2 <- c(mask.hap2, i)
       }
     }
 
-    ## Remove unreliable single cell haplotypes
-    if (length(mask.hap1)>0) {
+    ## Remove unreliable single cell haplotypes unless there is at least one left!!!
+    if (length(mask.hap1) > 0 & length(mask.hap1) < nrow(hap1)) {
       hap1.files <- hap1.files[-mask.hap1]
+      assembled.hap1 <- assembled.hap1[-mask.hap1]
       hap1 <- hap1[-mask.hap1, drop=FALSE,]
       hap1.quals <- hap1.quals[-mask.hap1, drop=FALSE,]
     }  
   
-    if (length(mask.hap2)>0) {
+    if (length(mask.hap2) > 0 & length(mask.hap2) < nrow(hap2)) {
       hap2.files <- hap2.files[-mask.hap2]
+      assembled.hap2 <- assembled.hap2[-mask.hap2]
       hap2 <- hap2[-mask.hap2, drop=FALSE,]
       hap2.quals <- hap2.quals[-mask.hap2, drop=FALSE,]
     }
   
+    if (length(mask.hap1) == nrow(hap1) | length(mask.hap2) == nrow(hap2)) {
+      warning("    Haplotypes did not pass concordance threshold: ", concordance, " !!!")
+    }  
+    
     ## Recalculate consensus haplotyes after filtering unreliable single cell haplotypes (using user defined settings)
     hap1.cons <- exportConsensus(data.bases = hap1, data.quals = hap1.quals, min.cov=1, translateBases=translateBases)
     hap2.cons <- exportConsensus(data.bases = hap2, data.quals = hap2.quals, min.cov=1, translateBases=translateBases)
