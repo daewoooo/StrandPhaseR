@@ -77,9 +77,9 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
   format4 <- "##FORMAT=<ID=P1,Number=1,Type=Float,Description=\"Probability value of allele 1\">"
   format5 <- "##FORMAT=<ID=P2,Number=1,Type=Float,Description=\"Probability value of allele 2\">"
   contig <- paste0("##contig=<ID=",chromosome, ",length=",chr.len,">")
-  cat(fileformat,date,source.alg,reference,phasing,format1,format2,format3,format4,format5,contig, sep = "\n", file=savefile.vcf, append=F)
+  cat(fileformat,date,source.alg,reference,phasing,format1,format2,format3,format4,format5,contig, sep = "\n", file=savefile.vcf, append=FALSE)
   #cat("##contig=<ID=",chromosome, ",length=",chr.len,">", sep="", file=savefile.vcf, append=F)
-  cat("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t", index, "\n", sep = "", file=savefile.vcf, append=T)
+  cat("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t", index, "\n", sep = "", file=savefile.vcf, append=TRUE)
   
   if (!is.null(phasedHap)) {
     hap1.pos <- phasedHap$hap1.cons$pos

@@ -190,8 +190,8 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
 	      
       }	else {
         message("No SNVs or WC regions for a give chromosome ", chr)
-        if (!is.null(conf[['exportVCF']]) & !is.null(conf[['bsGenome']])) {
-          message(" Printing empty VCF !!!")
+        if (!is.null(conf[['exportVCF']])) {
+          message("    Printing empty VCF file !!!")
           exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], chromosome=chr)
         }	
       }

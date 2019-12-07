@@ -132,9 +132,9 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
   
   } else {
     message(" Insufficient data to assemble haplotypes, skipping ...")
-    if (!is.null(exportVCF) & !is.null(bsGenome)) {
-      message(" Printing empty VCF !!!")
-      exportVCF(index = exportVCF, outputfolder = vcf.store, phasedHap = NULL, bsGenome=bsGenome, chromosome=chromosome)
+    if (!is.null(exportVCF)) {
+      message("    Printing empty VCF file !!!")
+      exportVCF(index = exportVCF, outputfolder = vcf.store, positions=positions, bsGenome = bsGenome, chromosome = chromosome)
     }	
   }
 } #end of function
