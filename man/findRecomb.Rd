@@ -4,8 +4,7 @@
 \alias{findRecomb}
 \title{Find meiotic recombination breakpoints using circular binary segmentation (CBS)}
 \usage{
-findRecomb(comparison = NULL, minSeg = 100, smooth = 3,
-  collapse.amb = TRUE)
+findRecomb(comparison = NULL, minSeg = 100, smooth = 3, collapse.amb = TRUE)
 }
 \arguments{
 \item{comparison}{A \code{\link{VRanges-class}} object}

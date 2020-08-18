@@ -4,8 +4,14 @@
 \alias{vcf2vranges}
 \title{Load a VCF file}
 \usage{
-vcf2vranges(vcfFile = NULL, genoField = NULL, translateBases = TRUE,
-  genome = "hg38", phased = FALSE, region = NULL)
+vcf2vranges(
+  vcfFile = NULL,
+  genoField = NULL,
+  translateBases = TRUE,
+  genome = "hg38",
+  phased = FALSE,
+  region = NULL
+)
 }
 \arguments{
 \item{vcfFile}{A path to a VCF file to be loaded.}

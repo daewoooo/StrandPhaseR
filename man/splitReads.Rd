@@ -5,8 +5,13 @@
 \title{This will take phased info for each haplotype and will split directional reads of each single cell into haplotype
 specific reads}
 \usage{
-splitReads(data.object = NULL, inputfolder = inputfolder,
-  pairedEndReads = FALSE, min.mapq = 10, filterAltAlign = TRUE)
+splitReads(
+  data.object = NULL,
+  inputfolder = inputfolder,
+  pairedEndReads = FALSE,
+  min.mapq = 10,
+  filterAltAlign = TRUE
+)
 }
 \arguments{
 \item{data.object}{containing sorted and filtered watson and crick haplotypes of each single cell along with phase info}

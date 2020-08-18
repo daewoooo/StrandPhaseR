@@ -4,8 +4,7 @@
 \alias{exportBedGraph}
 \title{Generates a bedgraph from GRanges object in order to upload on to UCSC Genome browser}
 \usage{
-exportBedGraph(index, outputfolder, fragments = NULL,
-  col = "200,100,10")
+exportBedGraph(index, outputfolder, fragments = NULL, col = "200,100,10")
 }
 \arguments{
 \item{index}{is used to index the bedfile(s)}

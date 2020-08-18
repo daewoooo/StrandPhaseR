@@ -4,9 +4,16 @@
 \alias{mapRecomb}
 \title{Map meiotic recombination events in a single family trio [father-mother-child].}
 \usage{
-mapRecomb(parent1 = NULL, parent2 = NULL, child = NULL,
-  genome = "hg38", method = "CBS", minSeg = 100, smooth = 3,
-  collapse.amb = TRUE)
+mapRecomb(
+  parent1 = NULL,
+  parent2 = NULL,
+  child = NULL,
+  genome = "hg38",
+  method = "CBS",
+  minSeg = 100,
+  smooth = 3,
+  collapse.amb = TRUE
+)
 }
 \arguments{
 \item{parent1}{A path to a VCF file to be loaded for a parent 1.}

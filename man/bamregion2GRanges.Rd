@@ -4,8 +4,14 @@
 \alias{bamregion2GRanges}
 \title{Import BAM file into GRanges}
 \usage{
-bamregion2GRanges(bamfile, bamindex = bamfile, region = NULL,
-  pairedEndReads = FALSE, min.mapq = 10, filterAltAlign = TRUE)
+bamregion2GRanges(
+  bamfile,
+  bamindex = bamfile,
+  region = NULL,
+  pairedEndReads = FALSE,
+  min.mapq = 10,
+  filterAltAlign = TRUE
+)
 }
 \arguments{
 \item{bamindex}{Bam-index file with or without the .bai ending. If this file does not exist it will be created and a warning is issued.}

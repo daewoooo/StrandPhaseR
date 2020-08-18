@@ -4,12 +4,24 @@
 \alias{phaseChromosome}
 \title{Wrapper function for StrandPhaseR}
 \usage{
-phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
-  positions = NULL, WCregions = NULL, chromosome = NULL,
-  pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
-  num.iterations = 2, translateBases = TRUE, concordance = 0.9,
-  fillMissAllele = NULL, splitPhasedReads = FALSE,
-  compareSingleCells = FALSE, exportVCF = NULL, bsGenome = NULL)
+phaseChromosome(
+  inputfolder,
+  outputfolder = "./StrandPhaseR_analysis",
+  positions = NULL,
+  WCregions = NULL,
+  chromosome = NULL,
+  pairedEndReads = TRUE,
+  min.mapq = 10,
+  min.baseq = 30,
+  num.iterations = 2,
+  translateBases = TRUE,
+  concordance = 0.9,
+  fillMissAllele = NULL,
+  splitPhasedReads = FALSE,
+  compareSingleCells = FALSE,
+  exportVCF = NULL,
+  bsGenome = NULL
+)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}

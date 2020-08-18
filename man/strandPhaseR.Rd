@@ -4,13 +4,26 @@
 \alias{strandPhaseR}
 \title{Wrapper function}
 \usage{
-strandPhaseR(inputfolder, outputfolder = "./StrandPhaseR_analysis",
-  configfile = NULL, numCPU = 1, positions = NULL,
-  WCregions = NULL, chromosomes = NULL, pairedEndReads = TRUE,
-  min.mapq = 10, min.baseq = 20, num.iterations = 2,
-  translateBases = TRUE, concordance = 0.9, fillMissAllele = NULL,
-  splitPhasedReads = FALSE, compareSingleCells = FALSE,
-  exportVCF = NULL, bsGenome = NULL)
+strandPhaseR(
+  inputfolder,
+  outputfolder = "./StrandPhaseR_analysis",
+  configfile = NULL,
+  numCPU = 1,
+  positions = NULL,
+  WCregions = NULL,
+  chromosomes = NULL,
+  pairedEndReads = TRUE,
+  min.mapq = 10,
+  min.baseq = 20,
+  num.iterations = 2,
+  translateBases = TRUE,
+  concordance = 0.9,
+  fillMissAllele = NULL,
+  splitPhasedReads = FALSE,
+  compareSingleCells = FALSE,
+  exportVCF = NULL,
+  bsGenome = NULL
+)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
