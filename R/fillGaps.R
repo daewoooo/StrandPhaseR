@@ -259,6 +259,16 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   #read in referene vcf file
   suppressMessages( snvs <- vcf2ranges(vcfFile=ref.vcf, genotypeField=1, chromosome=chromosome) )
   
+  ## Remove duplicated SNV positions if exists
+  msg <- NULL
+  dup.snvs <- any(duplicated(snvs))
+  if (dup.snvs) {
+    mask <- !duplicated(snvs)
+    removed.snvs <- table(mask)['FALSE']
+    snvs <- snvs[mask]
+    msg <- paste0("    Removed ", removed.snvs, " duplicated SNV positions!!!")
+  }
+  
   # Fill gaps in haplotype 1
   hits.hap1 <- findOverlaps(snvs, hap1Gaps.gr)
   missed.hap1 <- snvs[queryHits(hits.hap1)]
@@ -296,5 +306,8 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   filled.haps[['assem.haps']] <- haps
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
+  if (is.character(msg)) {
+    message(msg)
+  }
   return(filled.haps)
 }

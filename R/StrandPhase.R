@@ -127,6 +127,15 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   #gt <- extract.gt(vcf)
   #hets <- is_het(gt)
   
+  ## Remove duplicated SNV positions if exists
+  dup.snvs <- any(duplicated(snvs))
+  if (dup.snvs) {
+    mask <- !duplicated(snvs)
+    removed.snvs <- table(mask)['FALSE']
+    snvs <- snvs[mask]
+    message("    Removed ", removed.snvs, " duplicated SNV positions!!!")
+  }
+  
   WC.regions <- read.table(conf[['WCregions']], header=F)
   #WC.regions <- read.table(conf[['WCregions']], header=F, sep = ":")
   WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))
