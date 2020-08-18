@@ -159,7 +159,7 @@ plotSingleCellHaps <- function(data, file=NULL) {
 #' 
 #' @param hapSegm.gr A \code{\link{GRanges-class}} object with regions of each inherited haplotype block
 #' @param layout Set to 'vertical' or 'horizonal' based on desired layout of an resultant ideogram.
-#' @importFrom dplyr "%>%"
+#' @importFrom dplyr %>%
 #' @return A \code{ggplot} object.
 #' @author David Porubsky
 #' @export
