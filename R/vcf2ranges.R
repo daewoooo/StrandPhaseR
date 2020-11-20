@@ -57,7 +57,7 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
 #' @param phased If set to \code{TRUE} all unphased variants are removed.
 #' @param region A \code{\link{GRanges}} obejct of genomic regions to be loaded from input VCF file.
 #' @importFrom tidyr separate
-#' @importFrom VariantAnnotation readVcfAsVRanges
+#' @importFrom VariantAnnotation readVcfAsVRanges ScanVcfParam
 #' @return A \code{\link{VRanges-class}} object.
 #' @author David Porubsky
 #' @export
