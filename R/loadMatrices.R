@@ -93,12 +93,16 @@ loadMatrices <- function(inputfolder=NULL, positions=NULL, WCregions=NULL, paire
         df.qualsCrick <- as(quals.crick, "data.frame")
         df.qualsWatson <- as(quals.watson, "data.frame")
         
-        bases.crick <- strsplit(df.pilesCrick$x, "")
-        bases.watson <- strsplit(df.pilesWatson$x, "")
+        #bases.crick <- strsplit(df.pilesCrick$x, "")
+        #bases.watson <- strsplit(df.pilesWatson$x, "")
+        bases.crick <- strsplit(df.pilesCrick[,1], "")
+        bases.watson <- strsplit(df.pilesWatson[,1], "")
         
         ## translate raw base qualities into a number (for Sanger 33)
-        quals.crick <- sapply(df.qualsCrick$x, function(x) as.numeric(charToRaw(x))-33)
-        quals.watson <- sapply(df.qualsWatson$x, function(x) as.numeric(charToRaw(x))-33)
+        #quals.crick <- sapply(df.qualsCrick$x, function(x) as.numeric(charToRaw(x))-33)
+        #quals.watson <- sapply(df.qualsWatson$x, function(x) as.numeric(charToRaw(x))-33)
+        quals.crick <- sapply(df.qualsCrick[,1], function(x) as.numeric(charToRaw(x))-33)
+        quals.watson <- sapply(df.qualsWatson[,1], function(x) as.numeric(charToRaw(x))-33)
         
         ## TODO: change mean base quality values to calculate join probability for overlapping reads
         filtbases.crick <- mapply(function(X,Y) { X[Y >= min.baseq] }, X=bases.crick, Y=quals.crick)
