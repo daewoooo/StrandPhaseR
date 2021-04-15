@@ -3,7 +3,7 @@
 #' @param data.object A \code{list} output from the function \code{\link{compareSingleCellHaps}}
 #' @param chromosome  A chromosome id.
 #' @importFrom fastseg fastseg
-#' 
+#' @importFrom IRanges IRanges
 #' @author David Porubsky
 #' @export
 
@@ -45,8 +45,8 @@ LOHseeker <- function(data.object=NULL, chromosome=NULL, bin.size=10) {
       H2.segs.haps <- ifelse(H2.segs$seg.mean > 0.9, "H1", ifelse(H2.segs$seg.mean < 0.1, 'H2', 'NA'))
       
       #create GRanges object of loacalized segments
-      H1.segments <- GRanges(seqnames=chromosome, ranges=IRanges(start=H1.starts, end=H1.ends), exp.Hap="H1", obs.Hap=H1.segs.haps, ID=cell.id)
-      H2.segments <- GRanges(seqnames=chromosome, ranges=IRanges(start=H2.starts, end=H2.ends), exp.Hap="H2", obs.Hap=H2.segs.haps, ID=cell.id)
+      H1.segments <- GRanges(seqnames=chromosome, ranges=IRanges::IRanges(start=H1.starts, end=H1.ends), exp.Hap="H1", obs.Hap=H1.segs.haps, ID=cell.id)
+      H2.segments <- GRanges(seqnames=chromosome, ranges=IRanges::IRanges(start=H2.starts, end=H2.ends), exp.Hap="H2", obs.Hap=H2.segs.haps, ID=cell.id)
       cell.segments <- c(H1.segments, H2.segments)
       all.segments[[cell.id]] <- cell.segments
     }  

@@ -6,7 +6,7 @@
 #' @param bin.size A size of the window measured in number of SNV to scan single cell haplotypes.
 #' @param step A step (number of SNVs) to move the window.
 #' @importFrom zoo rollapply
-#' 
+#' @importFrom stats complete.cases
 #' @author David Porubsky
 #' @export
 
@@ -71,9 +71,9 @@ compareSingleCellHaps <- function(consensusHaps=NULL, sortedHaps=NULL, bin.size=
     
       #prepara data frame structure to compare single cell haplotypes
       hap1.comp <- data.frame(cell.hap1=cell.hap1, cons.hap1=hap1.cons.code[names(cell.hap1)], cons.hap2=hap2.cons.code[names(cell.hap1)])
-      hap1.comp <- hap1.comp[complete.cases(hap1.comp),]
+      hap1.comp <- hap1.comp[stats::complete.cases(hap1.comp),]
       hap2.comp <- data.frame(cell.hap2=cell.hap2, cons.hap1=hap1.cons.code[names(cell.hap2)], cons.hap2=hap2.cons.code[names(cell.hap2)])
-      hap2.comp <- hap2.comp[complete.cases(hap2.comp),]
+      hap2.comp <- hap2.comp[stats::complete.cases(hap2.comp),]
     
       #per position haplotype comparison
       #hap1.perPos.comp <- re

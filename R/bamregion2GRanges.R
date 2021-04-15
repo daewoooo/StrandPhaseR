@@ -9,6 +9,8 @@
 #' @param min.mapq Minimum mapping quality when importing from BAM files.
 #' @importFrom Rsamtools indexBam scanBamHeader ScanBamParam scanBamFlag testPairedEndBam
 #' @importFrom GenomicAlignments readGAlignmentPairs readGAlignments first last
+#' @importFrom methods as
+#' @importFrom GenomeInfoDb seqlevels
 #' @author Aaron Taudt, David Porubsky, Ashley Sanders
 #' @export
 
@@ -50,7 +52,7 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
     strand(data.last) <- strand(data.first)
     data <- GenomicRanges::sort(c(data.first, data.last), ignore.strand=TRUE)
   } else {
-    data <- as(data.raw, 'GRanges')
+    data <- methods::as(data.raw, 'GRanges')
   }
   
   ## Filter duplicates for pairedEndReads
@@ -76,7 +78,7 @@ bamregion2GRanges <- function(bamfile, bamindex=bamfile, region=NULL, pairedEndR
   
   #data <- data[seqnames(data) %in% seqlevels(region)]
   #seqlevels(data) <- seqlevels(region)
-  data <- GenomeInfoDb::keepSeqlevels(data, seqlevels(region), pruning.mode="coarse")
+  data <- GenomeInfoDb::keepSeqlevels(data, GenomeInfoDb::seqlevels(region), pruning.mode="coarse")
   #data <- GenomeInfoDb::keepSeqlevels(data, seqlevels(region))	
   	
   return(data)

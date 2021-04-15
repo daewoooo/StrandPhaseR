@@ -8,7 +8,7 @@
 #'
 plotPhasedReads <- function(datapath, plotChromosomes = NULL, file=NULL) {
   
-  RData.objects <- list.files(datapath, pattern="_reads.RData$", full=T)
+  RData.objects <- list.files(datapath, pattern="_reads.RData$", full.names = TRUE)
   
   data <- get(load(RData.objects))  
   
@@ -80,17 +80,17 @@ loadGRangesFromFiles <- function(files) {
 #' @param datapath containing split watson and crick reads per haplotype
 #' @param perChromosome if TRUE function will plot density for every chromosome, otherwise one summary density plot is exported
 #' @param file name of the file to save produced plots (add appropriate file extension)
-#' 
+#' @importFrom utils read.table
 #' @author David Porubsky
 #'
 plotHapDensity <- function(datapath, perChromosome=FALSE, file=NULL, HighQual=FALSE) {
 
-	phased.data <- list.files(datapath, pattern="_phased_hap", full=T)	
+	phased.data <- list.files(datapath, pattern="_phased_hap", full.names = TRUE)	
 
 	files.dist <- list()
 	for (i in 1:length(phased.data)) {
 
-		phasedHap <- read.table(phased.data[i], header=T)
+		phasedHap <- utils::read.table(phased.data[i], header=TRUE)
 		if (HighQual) {
 			qual.factor <- (1-phasedHap$ent)*phasedHap$cov
 			pos <- phasedHap$pos[qual.factor>=2]
@@ -113,21 +113,21 @@ plotHapDensity <- function(datapath, perChromosome=FALSE, file=NULL, HighQual=FA
 		names(dfplt) <- categories
 		dfplt$Filename <- rownames(dfplt)
 		col.num <- floor(sqrt(length(rownames(dfplt))))
-		long.dfplt <- melt(dfplt)
-		ggplt <- ggplot(long.dfplt) + 
-		  geom_bar(aes(x=variable, y=value), stat="identity") + 
-		  facet_wrap(~Filename, ncol=col.num)
+		long.dfplt <- reshape2::melt(dfplt)
+		ggplt <- ggplot2::ggplot(long.dfplt) + 
+		  ggplot2::geom_bar(aes(x=variable, y=value), stat="identity") + 
+		  ggplot2::facet_wrap(~Filename, ncol=col.num)
 		if (!is.null(file)) {
 			filetype <- strsplit(file, "\\.")[[1]][2]
-			ggsave(file, ggplt, width=col.num*2 ,height=col.num*2, limitsize=FALSE, device=filetype)
+			ggplot2::ggsave(file, ggplt, width=col.num*2 ,height=col.num*2, limitsize=FALSE, device=filetype)
 		}
 	} else {
 		dist.sum <- colSums(phased.all.chr)
 		dfplt <- data.frame(Categ=categories, value=dist.sum)
-		ggplt <- ggplot(dfplt) + geom_bar(aes(x=Categ, y=value), stat="identity")
+		ggplt <- ggplot2::ggplot(dfplt) + geom_bar(aes(x=Categ, y=value), stat="identity")
 		if (!is.null(file)) {
 			filetype <- strsplit(file, "\\.")[[1]][2]
-			ggsave(file, ggplt, width=length(categories) ,height=length(categories)/2, device=filetype)
+			ggplot2::ggsave(file, ggplt, width=length(categories) ,height=length(categories)/2, device=filetype)
 		}
 	}
 	if(is.null(file)) { return(ggplt) }

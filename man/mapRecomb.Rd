@@ -22,7 +22,7 @@ mapRecomb(
 
 \item{child}{A path to a VCF file to be loaded for a child.}
 
-\item{genome}{A reference genome used by \code{readVcfAsVRanges} function. [e.g. 'hg38' - human]}
+\item{genome}{A reference genome used by \link[VariantAnnotation]{readVcfAsVRanges} function. [e.g. 'hg38' - human]}
 
 \item{method}{A user defined method to be used to map changes in haplotype blocks [default: CBS]}
 

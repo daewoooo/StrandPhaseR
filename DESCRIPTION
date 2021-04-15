@@ -26,8 +26,14 @@ Imports:
   doParallel,
   foreach,
   zoo,
+  stats,
   fastseg,
-  tidyr
+  tidyr,
+  BSgenome,
+  bamsignals,
+  breakpointR,
+  methods,
+  dplyr
 Suggests:
   knitr,
   testthat

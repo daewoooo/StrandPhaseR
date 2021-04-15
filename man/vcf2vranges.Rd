@@ -20,11 +20,11 @@ vcf2vranges(
 
 \item{translateBases}{Set to \code{TRUE} if REF and ALT alleles should be reported as A,C,G or T.}
 
-\item{genome}{A reference genome used by \code{readVcfAsVRanges} function. [e.g. 'hg38' - human]}
+\item{genome}{A reference genome used by \link[VariantAnnotation]{readVcfAsVRanges} function. [e.g. 'hg38' - human]}
 
 \item{phased}{If set to \code{TRUE} all unphased variants are removed.}
 
-\item{region}{A \code{\link{GRanges}} obejct of genomic regions to be loaded from input VCF file.}
+\item{region}{A \code{\link{GRanges}} object of genomic regions to be loaded from input VCF file.}
 }
 \value{
 A \code{\link{VRanges-class}} object.
