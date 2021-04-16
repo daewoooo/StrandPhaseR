@@ -50,21 +50,36 @@ exportBedGraph <- function(index, outputfolder, fragments=NULL, col="200,100,10"
 #' @param phasedHap Data object containing phased haplotypes 
 #' @param positions Set of heterozygous SNV positions used for phasing obtained from an input VCF files.
 #' @param bsGenome A \code{BSgenome} object which contains reference genome used to infer reference alleles.
+#' @param ref.fasta A user defined reference FASTA file to extract reference allele for all SNV positions.
 #' @param chromosome Name of the chromosome for which we want to export vcf file
 #' @import BSgenome
 #' @importFrom GenomeInfoDb seqlengths
+#' @importFrom Rsamtools FaFile indexFa scanFaIndex
 #' @author David Porubsky
 #' @export 
   
-exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=NULL, bsGenome=NULL, chromosome=NULL) {
+exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=NULL, bsGenome=NULL, ref.fasta=NULL, chromosome=NULL) {
   
   ## Print VCF header
   #savefile.vcf.gz <- gzfile(savefile.vcf, 'w')
   savefile.vcf <- file.path(outputfolder, paste0(chromosome, '_phased.vcf'))
   
   if (!is.null(bsGenome)) {
+    ## Get chromosome length from bsgenome object
     chr.len <- GenomeInfoDb::seqlengths(bsGenome)[seqnames(bsGenome) == chromosome]
+  } else if (!is.null(ref.fasta)) {
+    ## Check if submitted fasta file is indexed
+    ref.fasta.idx <- paste0(ref.fasta, ".fai")
+    if (!file.exists(ref.fasta.idx)) {
+      message("Index file for '", ref.fasta, "' not available, indexing ...")
+      fa.idx <- Rsamtools::indexFa(file = ref.fasta)
+    }
+    ## Get FASTA index
+    fa.idx <- Rsamtools::scanFaIndex(ref.fasta)
+    ## Get chromosome length from reference fasta
+    chr.len <- GenomeInfoDb::seqlengths(fa.idx)[chromosome] 
   } else {
+    ## If both bsGenome as well as ref.fasta are missing ASSUME chromosome length is the max SNV position for a given chromosome.
     chr.len <- max(end(positions))
   } 
   
@@ -97,13 +112,21 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
     hap2.alleles <- names(sort(c(hap2.pos, hap2.gap)))
     
     #if (!grepl('chr', chromosome)) { chromosome <- sub(pattern='^', replacement='chr', chromosome) } #always add 'chr' if missing at the beginning of chromosome number
-    ## Extract reference alleles from the reference genome if available
+    
+    ## Get phased SNV positions
+    snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, IRanges(start=snv.pos, end=snv.pos))
     if (!is.null(bsGenome)) {
-      snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, IRanges(start=snv.pos, end=snv.pos))
+      ## Extract reference alleles from the reference bsgenome object if available
       ref.alleles <- Biostrings::Views(bsGenome, snv.ranges)
       ref.alleles <- as(ref.alleles, "DNAStringSet")
       ref.alleles <- as(ref.alleles, "vector")
-    } else if (!is.null(positions)) {
+    } else if (!is.null(ref.fasta)) {
+      ## Extract SNV bases from user defined reference FASTA file
+      fa.file <- open(Rsamtools::FaFile(ref.fasta))
+      snv.seq <- Rsamtools::scanFa(file = fa.file, param = snv.ranges, as = "DNAStringSet")     
+      names(snv.seq) <- NULL
+      ref.alleles <- as.character(snv.seq)
+    } else if (!is.null(positions) & 'ref' %in% colnames(mcols(positions))) {
       ref.alleles <- positions[start(positions) %in% snv.pos]$ref
     } else {
       ref.alleles <- 'N'

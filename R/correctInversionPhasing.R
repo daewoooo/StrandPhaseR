@@ -26,7 +26,7 @@
 #' @author David Porubsky
 #' @export
 #'
-correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=NULL, recall.phased=FALSE, het.genotype='strict', chromosomes=NULL, snv.positions=NULL, breakpointR.data=NULL, strandphaseR.data=NULL, pairedEndReads=TRUE, min.mapq=10, vcfs.files=NULL, lookup.bp=1000000, lookup.blacklist=NULL, bsGenome=NULL, overwrite.results=TRUE) {
+correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=NULL, recall.phased=FALSE, het.genotype='strict', chromosomes=NULL, snv.positions=NULL, breakpointR.data=NULL, strandphaseR.data=NULL, pairedEndReads=TRUE, min.mapq=10, vcfs.files=NULL, lookup.bp=1000000, lookup.blacklist=NULL, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=TRUE, overwrite.results=TRUE) {
   
   ## Check user input ##
   ######################
@@ -44,7 +44,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
   } 
   
   ## Check input format of blacklisted regions and load a BED file if needed
-  if (!class(lookup.blacklist) == 'GRanges') {
+  if (!is.null(lookup.blacklist) & !class(lookup.blacklist) == 'GRanges') {
     if (file.exists(lookup.blacklist)) {
       lookup.blacklist.df <- utils::read.table(file = lookup.blacklist, header = FALSE, sep = '\t', stringsAsFactors = FALSE)
       if (ncol(lookup.blacklist.df) >= 3) {
@@ -52,9 +52,11 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
         colnames(lookup.blacklist.df) <-  c('seqnames', 'start', 'end')
         lookup.blacklist <- GenomicRanges::makeGRangesFromDataFrame(lookup.blacklist.df)
       } else {
+        lookup.blacklist <- NULL
         warning("The BED file, '", lookup.blacklist, "' doesn't contain required fields ('chr.name', 'start', 'end').")
       }
     } else {
+      lookup.blacklist <- NULL
       warning("The BED file, '", lookup.blacklist, "' doesn't exists.")
     }
   }
@@ -231,7 +233,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
           het.gr <- roi.gr
         }
         
-        het.haps <- phaseHETinversion(input.bams = input.bams, snv.positions=snv.positions, phase.gr=het.gr, lookup.bp = lookup.bp, lookup.blacklist = lookup.blacklist, pairedEndReads = pairedEndReads, min.mapq = min.mapq, bsGenome = bsGenome)
+        het.haps <- phaseHETinversion(input.bams = input.bams, snv.positions=snv.positions, phase.gr=het.gr, lookup.bp = lookup.bp, lookup.blacklist = lookup.blacklist, pairedEndReads = pairedEndReads, min.mapq = min.mapq, bsGenome = bsGenome, ref.fasta = ref.fasta, assume.biallelic = assume.biallelic)
         ## Assign inverted haplotype to either H1 or H2 based on 'phased.reads.genot'
         if (phased.reads.genot$bestFit == 'cc') {
           if (!is.null(het.haps)) {
@@ -309,7 +311,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
 } ## End of function  
 
 
-#' Phase heterozygous inversion using Strand-seq
+#' Phase a heterozygous inversion using Strand-seq data
 #' 
 #' This function takes as an input region deemed to be a heterozygous inversion and attempts to phase SNVs inside this region using
 #' haplotype informative Strand-seq reads from multiple single cells.
@@ -318,6 +320,8 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
 #' @param lookup.bp A number of nucleotides, downstream and upstream, from the heterozygous inversion site ('phase.gr') to be genotyped.
 #' @param lookup.blacklist A \code{\link{GRanges}} object or a path to a BED file containing a set of ranges to be excluded 
 #' when extending 'phase.gr' by 'lookup.bp'. The total size of 'lookup.bp' is kept after filtering.
+#' @param assume.biallelic If set to \code{TRUE} parameter 'snv.positions' is expected to contain biallelic loci (0/1, 1/0) and thus
+#' gaps in haplotypes will be filled accordingly.
 #' @param verbose Is set to \code{TRUE} function will provide a more detailed messaging of ongoing analysis steps.
 #' @importFrom bamsignals bamCount
 #' @importFrom Biostrings alphabetFrequency Views
@@ -328,11 +332,12 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
 #' @inheritParams bamregion2GRanges
 #' @inheritParams phaseChromosome
 #' @inheritParams vcf2vranges
+#' @inheritParams exportVCF
 #' @return A \code{data.frame} with phased alleles per inverted and reference haplotype.
 #' @author David Porubsky
 #' @export
 #'
-phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL, lookup.bp=1000000, lookup.blacklist=NULL, pairedEndReads=TRUE, min.mapq=10, bsGenome=NULL, verbose=FALSE) {
+phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL, lookup.bp=1000000, lookup.blacklist=NULL, pairedEndReads=TRUE, min.mapq=10, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=TRUE, verbose=FALSE) {
   
   ## Load BSgenome
   if (class(bsGenome) != 'BSgenome') {
@@ -341,6 +346,14 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       bsGenome <- eval(parse(text=bsGenome)) # replacing string by object
     } else {
       bsGenome <- NULL
+    }
+  }
+  
+  ## Check if ref.fasta file is in a valid FASTA format
+  if (!is.null(ref.fasta)) {
+    if (class(Rsamtools::FaFile(ref.fasta)) != "FaFile") {
+      ref.fasta <- NULL
+      warning("User defined reference FASTA file, '", ref.fasta, "' is not in proper FASTA format!!!")
     }
   }
   
@@ -450,10 +463,10 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
         inv.bases.freq <- Biostrings::alphabetFrequency(piles.inv.reads, baseOnly=TRUE)
         ## Remove empty sites
         inv.bases.idx <- which(rowSums(inv.bases.freq) > 0)
-        inv.bases.freq <- inv.bases.freq[inv.bases.idx,]
+        inv.bases.freq <- inv.bases.freq[drop=FALSE, inv.bases.idx,]
         # Remove positions with ambiguous allele counts (max and second max equally abundant)
         filt.ambig <- apply(inv.bases.freq, 1, function(x) (sum(x) - max(x)) < max(x))
-        inv.bases.freq <- inv.bases.freq[filt.ambig,]
+        inv.bases.freq <- inv.bases.freq[drop=FALSE, filt.ambig,]
         inv.bases.idx <-  inv.bases.idx[filt.ambig]
         # Get max covered alleles
         max.idx <- apply(inv.bases.freq, 1, which.max)
@@ -484,10 +497,10 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
         ref.bases.freq <- Biostrings::alphabetFrequency(piles.ref.reads, baseOnly=TRUE)
         ## Remove empty sites
         ref.bases.idx <- which(rowSums(ref.bases.freq) > 0)
-        ref.bases.freq <- ref.bases.freq[ref.bases.idx,]
+        ref.bases.freq <- ref.bases.freq[drop=FALSE, ref.bases.idx,]
         # Remove positions with ambiguous allele counts (max and second max equally abundant)
         filt.ambig <- apply(ref.bases.freq, 1, function(x) (sum(x) - max(x)) < max(x))
-        ref.bases.freq <- ref.bases.freq[filt.ambig,]
+        ref.bases.freq <- ref.bases.freq[drop=FALSE, filt.ambig,]
         ref.bases.idx <-  ref.bases.idx[filt.ambig]
         # Get max covered alleles
         max.idx <- apply(ref.bases.freq, 1, which.max)
@@ -518,22 +531,40 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       
       ## Assign reference and alternative alleles
       if (!is.null(bsGenome)) {
+        ## Extract reference alleles from the reference bsgenome object if available
         snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, IRanges(start=pos.gen, end=pos.gen))
         ref.base <- Biostrings::Views(bsGenome, snv.ranges)
         ref.base <- as(ref.base, "DNAStringSet")
         ref.base <- as(ref.base, "vector")
-        
-        inv.phase <- rep('.', times=length(pos.gen))
-        ref.phase <- rep('.', times=length(pos.gen))
-        inv.phase[inv.allele == ref.base] <- 0
-        inv.phase[inv.allele != ref.base & inv.allele != '.'] <- 1
-        ref.phase[ref.allele == ref.base] <- 0
-        ref.phase[ref.allele != ref.base & ref.allele != '.'] <- 1
-        
-        phased.df <- data.frame(pos.gen=pos.gen, ref.allele=ref.allele, inv.allele=inv.allele, ref.phase=ref.phase, inv.phase=inv.phase, ref.base=ref.base)
+      } else if (!is.null(ref.fasta)) {
+        ## Extract SNV bases from user defined reference FASTA file
+        fa.file <- open(Rsamtools::FaFile(ref.fasta))
+        snv.seq <- Rsamtools::scanFa(file = fa.file, param = snv.ranges, as = "DNAStringSet")     
+        names(snv.seq) <- NULL
+        ref.base <- as.character(snv.seq)
       } else {
-        phased.df <- data.frame(pos.gen=pos.gen, ref.allele=ref.allele, inv.allele=inv.allele)
+        ref.base <- rep('N', length(pos.gen))
       }
+        
+      ## Report inverted and reference haplotypes
+      inv.phase <- rep('.', times=length(pos.gen))
+      ref.phase <- rep('.', times=length(pos.gen))
+      inv.phase[inv.allele == ref.base] <- 0
+      inv.phase[inv.allele != ref.base & inv.allele != '.'] <- 1
+      ref.phase[ref.allele == ref.base] <- 0
+      ref.phase[ref.allele != ref.base & ref.allele != '.'] <- 1
+      inv.allele[inv.allele == '.'] <- 'N'
+      ref.allele[ref.allele == '.'] <- 'N'
+      
+      if (assume.biallelic) {
+        inv.phase.gaps <- which(inv.phase == '.')
+        inv.phase[inv.phase.gaps] <- dplyr::recode(ref.phase[inv.phase.gaps], '0' = '1', '1' = '0')
+        ref.phase.gaps <- which(ref.phase == '.')
+        ref.phase[ref.phase.gaps] <- dplyr::recode(inv.phase[ref.phase.gaps], '0' = '1', '1' = '0')
+        inv.allele[inv.phase == '0'] <- ref.base[inv.phase == '0']
+        ref.allele[ref.phase == '0'] <- ref.base[ref.phase == '0']
+      }  
+      phased.df <- data.frame(pos.gen=pos.gen, ref.allele=ref.allele, inv.allele=inv.allele, ref.phase=ref.phase, inv.phase=inv.phase, ref.base=ref.base)
     } else {
       phased.df <- NULL
     }

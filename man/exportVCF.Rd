@@ -10,6 +10,7 @@ exportVCF(
   phasedHap = NULL,
   positions = NULL,
   bsGenome = NULL,
+  ref.fasta = NULL,
   chromosome = NULL
 )
 }
@@ -23,6 +24,8 @@ exportVCF(
 \item{positions}{Set of heterozygous SNV positions used for phasing obtained from an input VCF files.}
 
 \item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
+
+\item{ref.fasta}{A user defined reference FASTA file to extract reference allele for all SNV positions.}
 
 \item{chromosome}{Name of the chromosome for which we want to export vcf file}
 }

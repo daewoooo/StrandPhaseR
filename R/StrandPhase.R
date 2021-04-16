@@ -6,12 +6,12 @@
 #' @inheritParams phaseChromosome
 #' @import foreach
 #' @import doParallel 
-#' @importFrom Rsamtools scanBamHeader
+#' @importFrom Rsamtools scanBamHeader FaFile
 
 #' @author David Porubsky
 #' @export
 
-strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=20, num.iterations=2, translateBases=TRUE, concordance=0.9, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL) {
+strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', configfile=NULL, numCPU=1, positions=NULL, WCregions=NULL, chromosomes=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=20, num.iterations=2, translateBases=TRUE, concordance=0.9, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL, ref.fasta=NULL) {
   
   #=======================
   ### Helper functions ###
@@ -42,6 +42,14 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
     bsGenome <- attributes(bsGenome)$pkgname
   }
   
+  ## Check if ref.fasta file is in a valid FASTA format
+  if (!is.null(ref.fasta)) {
+    if (class(Rsamtools::FaFile(ref.fasta)) != "FaFile") {
+      ref.fasta <- NULL
+      warning("User defined reference FASTA file, '", ref.fasta, "' is not in a proper FASTA format!!!")
+    }
+  }
+  
   ## If parameter chromosomes is not defined process all chromosomes present in BAM files
   if (is.null(chromosomes)) {
     bamFile <- list.files(inputfolder, pattern = ".bam$", full.names = TRUE)[1]
@@ -51,7 +59,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   }
   
   ## Put options into list and merge with conf
-  params <- list(numCPU=numCPU, positions=positions, WCregions=WCregions, chromosomes=chromosomes, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq, num.iterations=num.iterations, translateBases=translateBases, concordance=concordance, fillMissAllele=fillMissAllele, splitPhasedReads=splitPhasedReads, compareSingleCells=compareSingleCells, exportVCF=exportVCF, bsGenome=bsGenome)
+  params <- list(numCPU=numCPU, positions=positions, WCregions=WCregions, chromosomes=chromosomes, pairedEndReads=pairedEndReads, min.mapq=min.mapq, min.baseq=min.baseq, num.iterations=num.iterations, translateBases=translateBases, concordance=concordance, fillMissAllele=fillMissAllele, splitPhasedReads=splitPhasedReads, compareSingleCells=compareSingleCells, exportVCF=exportVCF, bsGenome=bsGenome, ref.fasta=ref.fasta)
   conf <- c(conf, params[setdiff(names(params),names(conf))])
   
   #===================
@@ -71,39 +79,39 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ### Create directiories ###
   #==========================
   ## Creating directories for data export
-  if (!file.exists(outputfolder)) {
+  if (!dir.exists(outputfolder)) {
     dir.create(outputfolder)
   }
   
   phased.store <- file.path(outputfolder, 'Phased')
-  if (!file.exists(phased.store)) {
+  if (!dir.exists(phased.store)) {
     dir.create(phased.store)
   }
   
   data.store <- file.path(outputfolder, 'data')
-  if (!file.exists(data.store)) {
+  if (!dir.exists(data.store)) {
     dir.create(data.store)
   }
   
   browser.store <- file.path(outputfolder, 'browserFiles')
-  if (!file.exists(browser.store)) {
+  if (!dir.exists(browser.store)) {
     dir.create(browser.store)
   }
   
   vcf.store <- file.path(outputfolder, 'VCFfiles')
-  if (!file.exists(vcf.store)) {
+  if (!dir.exists(vcf.store)) {
     dir.create(vcf.store)
   }
   
   singlecell.store <- file.path(outputfolder, 'SingleCellHaps')
-  if (!file.exists(singlecell.store)) {
+  if (!dir.exists(singlecell.store)) {
     dir.create(singlecell.store)
   }
 
-  ## export haplotypes
+  ## Export haplotypes
   destination <- file.path(phased.store, 'phased_haps.txt')
   phased_haps.header <- matrix(c("sample", "cell", "chrom", "start", "end", "class", "hap1.cis.simil", "hap1.trans.simil", "hap2.cis.simil", "hap2.trans.simil"), nrow = 1)	
-  write.table(data.frame(phased_haps.header), file=destination, row.names = F, quote = F, col.names = F, sep = "\t")	
+  utils::write.table(data.frame(phased_haps.header), file=destination, row.names = FALSE, quote = FALSE, col.names = FALSE, sep = "\t")	
   
   ## Make a copy of the conf file
   writeConfig(conf, configfile=file.path(outputfolder, 'StrandPhaseR.config'))
@@ -111,7 +119,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ## Load BSgenome
   if (class(conf[['bsGenome']])!='BSgenome') {
     if (is.character(conf[['bsGenome']])) {
-      suppressPackageStartupMessages(library(conf[['bsGenome']], character.only=T))
+      suppressPackageStartupMessages(library(conf[['bsGenome']], character.only = TRUE))
       conf[['bsGenome']] <- as.object(conf[['bsGenome']]) # replacing string by object
     }
   }
@@ -119,8 +127,9 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ## Loading in list of SNV positions and locations of WC regions
   if (grepl(conf[['positions']], pattern = "\\.vcf", ignore.case = TRUE)) {
     snvs <- vcf2ranges(vcfFile=conf[['positions']], genotypeField=1, chromosome=conf[['chromosomes']])
-  } else {  
-    snvs <- read.table(conf[['positions']], header=F)
+  } else {
+    message("Loading SNV positions from BED file")
+    snvs <- utils::read.table(conf[['positions']], header=F)
     snvs <- GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
   }
   #vcf <- read.vcfR(file = conf[['positions']], limit = 10000000, convertNA = TRUE, verbose = FALSE)
@@ -136,7 +145,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
     message("    Removed ", removed.snvs, " duplicated SNV positions!!!")
   }
   
-  WC.regions <- read.table(conf[['WCregions']], header=F)
+  WC.regions <- utils::read.table(conf[['WCregions']], header=FALSE)
   #WC.regions <- read.table(conf[['WCregions']], header=F, sep = ":")
   WC.regions <- GRanges(seqnames=WC.regions$V1, IRanges(start=WC.regions$V2, end=WC.regions$V3), filename=as.character(WC.regions$V4))
   
@@ -163,7 +172,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)	
         
         tC <- tryCatch({
-          phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], concordance=conf[['concordance']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
+          phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], concordance=conf[['concordance']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']], compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']], ref.fasta=conf[['ref.fasta']]) 
         }, error = function(err) {
           stop(chr,'\n',err)
         })
@@ -172,7 +181,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         message("No SNVs or WC regions for a give chromosome ", chr)
         if (!is.null(conf[['exportVCF']]) & !is.null(conf[['bsGenome']])) {
           message(" Printing empty VCF !!!")
-          exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], chromosome=chr)
+          exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], ref.fasta=conf[['ref.fasta']], chromosome=chr)
         }	
       }		
     }
@@ -195,13 +204,13 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         #snvs.chr <- keepSeqlevels(snvs.chr, chr)
         #WCregions.chr <- keepSeqlevels(WCregions.chr, chr)			
         
-        phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], concordance=conf[['concordance']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']]) 
+        phaseChromosome(inputfolder=inputfolder, outputfolder=outputfolder, positions=snvs.chr, WCregions=WCregions.chr, chromosome=chr, pairedEndReads=conf[['pairedEndReads']], min.mapq=conf[['min.mapq']], min.baseq=conf[['min.baseq']], num.iterations=conf[['num.iterations']], translateBases=conf[['translateBases']], concordance=conf[['concordance']], fillMissAllele=conf[['fillMissAllele']], splitPhasedReads=conf[['splitPhasedReads']],  compareSingleCells=conf[['compareSingleCells']], exportVCF=conf[['exportVCF']], bsGenome=conf[['bsGenome']], ref.fasta=conf[['ref.fasta']]) 
 	      
       }	else {
         message("No SNVs or WC regions for a give chromosome ", chr)
         if (!is.null(conf[['exportVCF']])) {
           message("    Printing empty VCF file !!!")
-          exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], chromosome=chr)
+          exportVCF(index = conf[['exportVCF']], outputfolder = vcf.store, phasedHap = NULL, bsGenome=conf[['bsGenome']], ref.fasta=conf[['ref.fasta']], chromosome=chr)
         }	
       }
     }

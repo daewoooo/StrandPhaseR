@@ -2,7 +2,7 @@
 % Please edit documentation in R/phaseChromsome.R
 \name{phaseChromosome}
 \alias{phaseChromosome}
-\title{Wrapper function for StrandPhaseR}
+\title{Wrapper function for StrandPhaseR to phase a single chromosome.}
 \usage{
 phaseChromosome(
   inputfolder,
@@ -20,7 +20,8 @@ phaseChromosome(
   splitPhasedReads = FALSE,
   compareSingleCells = FALSE,
   exportVCF = NULL,
-  bsGenome = NULL
+  bsGenome = NULL,
+  ref.fasta = NULL
 )
 }
 \arguments{
@@ -46,15 +47,17 @@ phaseChromosome(
 
 \item{concordance}{Level of agreement between single cell and consensus haplotypes}
 
+\item{fillMissAllele}{A patch to a single BAM or VCF file for a given sample to be used to fill missing alleles, uncovered in Strand-seq data.}
+
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
 
 \item{compareSingleCells}{Set to \code{TRUE} if you want to compare haplotypes at the single-cell level.}
 
-\item{exportVCF}{...}
+\item{exportVCF}{Ideally a sample ID that if defined invokes export of phased haplotypes in a separate VCF file.}
 
 \item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
 
-\item{fillGaps}{...}
+\item{ref.fasta}{A user defined reference FASTA file to extract reference allele for all SNV positions.}
 }
 \description{
 This function will move through .bam files in a folder and perform several steps (see Details).

@@ -2,7 +2,7 @@
 % Please edit documentation in R/correctInversionPhasing.R
 \name{phaseHETinversion}
 \alias{phaseHETinversion}
-\title{Phase heterozygous inversion using Strand-seq}
+\title{Phase a heterozygous inversion using Strand-seq data}
 \usage{
 phaseHETinversion(
   input.bams = NULL,
@@ -13,6 +13,8 @@ phaseHETinversion(
   pairedEndReads = TRUE,
   min.mapq = 10,
   bsGenome = NULL,
+  ref.fasta = NULL,
+  assume.biallelic = TRUE,
   verbose = FALSE
 )
 }
@@ -33,6 +35,11 @@ when extending 'phase.gr' by 'lookup.bp'. The total size of 'lookup.bp' is kept 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
 \item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
+
+\item{ref.fasta}{A user defined reference FASTA file to extract reference allele for all SNV positions.}
+
+\item{assume.biallelic}{If set to \code{TRUE} parameter 'snv.positions' is expected to contain biallelic loci (0/1, 1/0) and thus
+gaps in haplotypes will be filled accordingly.}
 
 \item{verbose}{Is set to \code{TRUE} function will provide a more detailed messaging of ongoing analysis steps.}
 }
