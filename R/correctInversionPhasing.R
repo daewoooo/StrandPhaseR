@@ -607,10 +607,10 @@ correctHomInv <- function(correct.gr=NULL, vcf.file=NULL, ID='') {
   ## Filter positions with no reference allele and two alternative alleles
   vcf.data <- vcf.data[!vcf.data$GT %in% c('1|2', '1/2')]
   ## Make sure that missing values are converted from NAs to dots
-  vcf.data$Q1[is.na(vcf.data$Q1)] <- '.'
-  vcf.data$Q2[is.na(vcf.data$Q2)] <- '.'
-  vcf.data$P1[is.na(vcf.data$P1)] <- '.'
-  vcf.data$P2[is.na(vcf.data$P2)] <- '.'
+  vcf.data$Q1[is.na(vcf.data$Q1)] <- '0'
+  vcf.data$Q2[is.na(vcf.data$Q2)] <- '0'
+  vcf.data$P1[is.na(vcf.data$P1)] <- '0'
+  vcf.data$P2[is.na(vcf.data$P2)] <- '0'
   
   ## Flip haplotypes overlapping HOM inversion
   hits <- IRanges::findOverlaps(vcf.data, correct.gr, type = 'within')
@@ -676,11 +676,11 @@ correctHetInv <- function(correct.gr=NULL, vcf.file=NULL, het.haps=NULL, ID='') 
                                                                       param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, geno = c('GT','Q1','Q2','P1','P2') )) )
     ## Filter positions with no reference allele and two alternative alleles
     vcf.data <- vcf.data[!vcf.data$GT %in% c('1|2', '1/2')]
-    ## Make sure that missing values are converted from NAs to dots
-    vcf.data$Q1[is.na(vcf.data$Q1)] <- '.'
-    vcf.data$Q2[is.na(vcf.data$Q2)] <- '.'
-    vcf.data$P1[is.na(vcf.data$P1)] <- '.'
-    vcf.data$P2[is.na(vcf.data$P2)] <- '.'
+    ## Make sure that missing values are converted from NAs to zeroes
+    vcf.data$Q1[is.na(vcf.data$Q1)] <- '0'
+    vcf.data$Q2[is.na(vcf.data$Q2)] <- '0'
+    vcf.data$P1[is.na(vcf.data$P1)] <- '0'
+    vcf.data$P2[is.na(vcf.data$P2)] <- '0'
     
     ## Remove SNVs overlapping with HET inversion
     hits <- IRanges::findOverlaps(vcf.data, correct.gr, type = 'within')
@@ -691,7 +691,7 @@ correctHetInv <- function(correct.gr=NULL, vcf.file=NULL, het.haps=NULL, ID='') 
     
     #gt <- paste0(het.haps$ref.phase, '|', het.haps$inv.phase) ## Wrongly assuming H1 is always a ref.phase ... !!!
     gt <- paste0(het.haps$H1, '|', het.haps$H2)
-    gt <- paste0(gt, ':.:.:.:.')
+    gt <- paste0(gt, ':0:0:0:0')
     ## Get REF and ALT alleles
     REF <- het.haps$ref.base
     ALT <- rep('N', length(gt))

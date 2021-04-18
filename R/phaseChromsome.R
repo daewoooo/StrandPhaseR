@@ -27,7 +27,7 @@
 #' @author David Porubsky
 #' @export
 
-phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, concordance=0.9, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL, ref.fasta=NULL) {
+phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', positions=NULL, WCregions=NULL, chromosome=NULL, pairedEndReads=TRUE, min.mapq=10, min.baseq=30, num.iterations=2, translateBases=TRUE, concordance=0.9, fillMissAllele=NULL, splitPhasedReads=FALSE, compareSingleCells=FALSE, exportVCF=NULL, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=FALSE) {
   
   message("Working on chromosome ",chromosome)
   
@@ -113,11 +113,11 @@ phaseChromosome <- function(inputfolder, outputfolder='./StrandPhaseR_analysis',
 
     ## Export phased haplotypes into VCF file
     if (!is.null(exportVCF) & !is.null(bsGenome)) {		
-      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, bsGenome=bsGenome, chromosome=chromosome)
+      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, bsGenome=bsGenome, chromosome=chromosome, assume.biallelic=assume.biallelic)
     }	else if (!is.null(exportVCF) & !is.null(ref.fasta) & is.null(bsGenome)) {  
-      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, ref.fasta=ref.fasta, chromosome=chromosome)
+      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, ref.fasta=ref.fasta, chromosome=chromosome, assume.biallelic=assume.biallelic)
     }	else if (!is.null(exportVCF) & is.null(bsGenome)) {
-      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, positions=positions, chromosome=chromosome)
+      exportVCF(index = exportVCF, outputfolder=vcf.store, phasedHap=assem.haps, positions=positions, chromosome=chromosome, assume.biallelic=assume.biallelic)
     }
     
     ## Split reads per haplotype  

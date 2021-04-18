@@ -21,7 +21,8 @@ phaseChromosome(
   compareSingleCells = FALSE,
   exportVCF = NULL,
   bsGenome = NULL,
-  ref.fasta = NULL
+  ref.fasta = NULL,
+  assume.biallelic = FALSE
 )
 }
 \arguments{
@@ -58,6 +59,9 @@ phaseChromosome(
 \item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
 
 \item{ref.fasta}{A user defined reference FASTA file to extract reference allele for all SNV positions.}
+
+\item{assume.biallelic}{If set to \code{TRUE} parameter 'snv.positions' is expected to contain biallelic loci (0/1, 1/0) and thus
+gaps in haplotypes will be filled accordingly.}
 }
 \description{
 This function will move through .bam files in a folder and perform several steps (see Details).

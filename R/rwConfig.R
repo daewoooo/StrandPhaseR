@@ -67,7 +67,7 @@ writeConfig <- function(conf, configfile) {
 		cat(i1," = ",formatstring(conf[[i1]]),"\n", file=f)
 	}
 	cat("\n[StrandPhaseR]\n", file=f)
-	for (i1 in c('positions', 'WCregions', 'min.baseq', 'num.iterations', 'translateBases', 'fillMissAllele', 'splitPhasedReads', 'compareSingleCells', 'callBreaks', 'exportVCF', 'bsGenome', 'ref.fasta')) {
+	for (i1 in c('positions', 'WCregions', 'min.baseq', 'num.iterations', 'translateBases', 'fillMissAllele', 'splitPhasedReads', 'compareSingleCells', 'callBreaks', 'exportVCF', 'bsGenome', 'ref.fasta', 'assume.biallelic')) {
 		cat(i1," = ",formatstring(conf[[i1]]),"\n", file=f)
 	}
 	close(f, type='w')

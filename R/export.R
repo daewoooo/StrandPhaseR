@@ -55,10 +55,11 @@ exportBedGraph <- function(index, outputfolder, fragments=NULL, col="200,100,10"
 #' @import BSgenome
 #' @importFrom GenomeInfoDb seqlengths
 #' @importFrom Rsamtools FaFile indexFa scanFaIndex
+#' @inheritParams phaseHETinversion
 #' @author David Porubsky
 #' @export 
   
-exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=NULL, bsGenome=NULL, ref.fasta=NULL, chromosome=NULL) {
+exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=NULL, bsGenome=NULL, ref.fasta=NULL, chromosome=NULL, assume.biallelic=FALSE) {
   
   ## Print VCF header
   #savefile.vcf.gz <- gzfile(savefile.vcf, 'w')
@@ -67,6 +68,7 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
   if (!is.null(bsGenome)) {
     ## Get chromosome length from bsgenome object
     chr.len <- GenomeInfoDb::seqlengths(bsGenome)[seqnames(bsGenome) == chromosome]
+    reference <- paste0("##reference=", attributes(bsGenome)$pkgname)
   } else if (!is.null(ref.fasta)) {
     ## Check if submitted fasta file is indexed
     ref.fasta.idx <- paste0(ref.fasta, ".fai")
@@ -77,16 +79,18 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
     ## Get FASTA index
     fa.idx <- Rsamtools::scanFaIndex(ref.fasta)
     ## Get chromosome length from reference fasta
-    chr.len <- GenomeInfoDb::seqlengths(fa.idx)[chromosome] 
+    chr.len <- GenomeInfoDb::seqlengths(fa.idx)[chromosome]
+    reference <- ref.fasta 
   } else {
     ## If both bsGenome as well as ref.fasta are missing ASSUME chromosome length is the max SNV position for a given chromosome.
     chr.len <- max(end(positions))
+    reference <- 'unknown'
   } 
   
   fileformat <- "##fileformat=VCFv4.2"
   date <- paste("##fileDate=",Sys.Date(),sep="")
   source.alg <- "##source=StrandPhase_algorithm"
-  reference <- paste0("##reference=", attributes(bsGenome)$pkgname) 
+  reference <- reference 
   phasing <- "##phasing=Strand-seq"
   format1 <- "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">"
   format2 <- "##FORMAT=<ID=Q1,Number=1,Type=Float,Description=\"Quality measure of allele 1 (1-entropy)*coverage\">"
@@ -170,6 +174,17 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
   
     hap1.alleles[hap1.alleles == ""] <- "."
     hap2.alleles[hap2.alleles == ""] <- "."
+    
+    ## Fill gaps in haplotypes by opposing alleles assuming that all position are heterozygous
+    if (assume.biallelic) {
+      hap1.alleles[hap1.alleles == '.'] <- dplyr::recode(hap2.alleles[hap1.alleles == '.'], '0' = '1', '1' = '0')
+      hap2.alleles[hap2.alleles == '.'] <- dplyr::recode(hap1.alleles[hap2.alleles == '.'], '0' = '1', '1' = '0')
+      hap1.qual[hap1.qual == '.'] <- '0'
+      hap2.qual[hap2.qual == '.'] <- '0'
+      hap1.score[hap1.score == '.'] <- '0'
+      hap2.score[hap2.score == '.'] <- '0'
+    }
+    
     phased.alleles <- paste(hap1.alleles, hap2.alleles, sep="|")
     
     genotypes <- paste(phased.alleles, hap1.qual, hap2.qual, hap1.score, hap2.score, sep=":")
@@ -188,7 +203,7 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
       }
     }
     
-    alt.alleles <- mapply(collapse.alt, alt.alleles1, alt.alleles2, USE.NAMES = F)
+    alt.alleles <- mapply(collapse.alt, alt.alleles1, alt.alleles2, USE.NAMES = FALSE)
     alt.alleles[alt.alleles == ""] <- "N"
     
     snv.pos <- as.integer(format(snv.pos, scientific = FALSE)) #make sure no float numbers in the output
