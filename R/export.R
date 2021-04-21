@@ -80,11 +80,11 @@ exportVCF <- function(index=NULL, outputfolder=NULL, phasedHap=NULL, positions=N
     fa.idx <- Rsamtools::scanFaIndex(ref.fasta)
     ## Get chromosome length from reference fasta
     chr.len <- GenomeInfoDb::seqlengths(fa.idx)[chromosome]
-    reference <- ref.fasta 
+    reference <- paste0("##reference=", ref.fasta)
   } else {
     ## If both bsGenome as well as ref.fasta are missing ASSUME chromosome length is the max SNV position for a given chromosome.
     chr.len <- max(end(positions))
-    reference <- 'unknown'
+    reference <- paste0("##reference=", 'unknown')
   } 
   
   fileformat <- "##fileformat=VCFv4.2"

@@ -10,6 +10,7 @@
 #' if set to 'lenient' support from either 'breakpointR.data' only is sufficient.
 #' @param chromosomes Limit analysis to a certain chromosomes only.
 #' @param snv.positions A path to a VCF files containing SNV positions to phase.
+#' @param composite.file ...
 #' @param breakpointR.data A path to results obtained by running \code{\link{breakpointR}} package on a given sample.
 #' @param strandphaseR.data A path to results obtained by running \code{\link{StrandPhaseR}} package on a given sample.
 #' @param vcfs.files A path to a folder where all VCF files to be corrected are stored (sample specific).
@@ -26,7 +27,7 @@
 #' @author David Porubsky
 #' @export
 #'
-correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=NULL, recall.phased=FALSE, het.genotype='strict', chromosomes=NULL, snv.positions=NULL, breakpointR.data=NULL, strandphaseR.data=NULL, pairedEndReads=TRUE, min.mapq=10, vcfs.files=NULL, lookup.bp=1000000, lookup.blacklist=NULL, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=TRUE, overwrite.results=TRUE) {
+correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=NULL, recall.phased=FALSE, het.genotype='strict', chromosomes=NULL, snv.positions=NULL, composite.file=NULL, breakpointR.data=NULL, strandphaseR.data=NULL, pairedEndReads=TRUE, min.mapq=10, vcfs.files=NULL, lookup.bp=1000000, lookup.blacklist=NULL, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=TRUE, overwrite.results=TRUE) {
   
   ## Check user input ##
   ######################
@@ -62,13 +63,16 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
   }
   
   ## Abort function execution if breakpointR.data are not defined
-  if (is.null(breakpointR.data) & !file.exists(breakpointR.data)) {
-    stop("Required parameter 'breakpointR.data' is not defined or file doesn't exists, aborting ...")
-  } else {
+  if (!is.null(composite.file) & file.exists(composite.file)) {
+    message("Loading composite file: ", composite.file)
+    dir.reads <- get(load(composite.file))
+  } else if (!is.null(breakpointR.data) & file.exists(breakpointR.data)) {
     ## Load breakpointR.data and create a composite file
     breakp.data <- list.files(breakpointR.data, full.names = TRUE)
     dir.reads <- breakpointR::synchronizeReadDir(files2sync = breakp.data)
-  }
+  } else {
+    stop("Required parameters 'composite.file' or 'breakpointR.data' are not defined or files doesn't exists, aborting ...")
+  }  
   
   ## Abort function execution if strandphaseR.data are not defined
   if (is.null(strandphaseR.data) & !file.exists(strandphaseR.data)) {
@@ -301,8 +305,23 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
   } ## End of CHR loop
   ## Report correction summary table
   correction.summary.df <- do.call(rbind, correction.summary)
+  destination <- file.path(outputfolder, 'invPhasingCorrection.summary.tsv')
+  ## Reuse existing file if available
+  if (overwrite.results == FALSE) {
+    if (file.exists(destination)) {
+      message("Reporting inversions correction summary into an exisiting file, ", destination)
+      ## Read in existing report file
+      correction.summary.old <- utils::read.table(destination, header = TRUE)
+      ## Replace matching bed.regions with new results or append new results
+      replace.idx <- which(correction.summary.old$bed.region %in% correction.summary.df$bed.region)
+      toReplace <- which(correction.summary.df$bed.region %in% correction.summary.old$bed.region)
+      correction.summary.old[replace.idx,] <- correction.summary.df[toReplace,]
+      correction.summary.old <- rbind(correction.summary.old, correction.summary.df[-toReplace,])
+      correction.summary.df <- correction.summary.old
+    }
+  }
+  
   if (!is.null(outputfolder)) {
-    destination <- file.path(outputfolder, 'invPhasingCorrection.summary.tsv')
     utils::write.table(correction.summary.df, file = destination, quote = FALSE, sep = '\t', row.names = FALSE)
     return(NULL)
   } else {

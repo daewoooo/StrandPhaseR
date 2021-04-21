@@ -12,6 +12,7 @@ correctInvertedRegionPhasing(
   het.genotype = "strict",
   chromosomes = NULL,
   snv.positions = NULL,
+  composite.file = NULL,
   breakpointR.data = NULL,
   strandphaseR.data = NULL,
   pairedEndReads = TRUE,
@@ -40,6 +41,8 @@ if set to 'lenient' support from either 'breakpointR.data' only is sufficient.}
 \item{chromosomes}{Limit analysis to a certain chromosomes only.}
 
 \item{snv.positions}{A path to a VCF files containing SNV positions to phase.}
+
+\item{composite.file}{...}
 
 \item{breakpointR.data}{A path to results obtained by running \code{\link{breakpointR}} package on a given sample.}
 
