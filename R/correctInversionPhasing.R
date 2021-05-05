@@ -63,9 +63,13 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
   }
   
   ## Abort function execution if breakpointR.data are not defined
-  if (!is.null(composite.file) & file.exists(composite.file)) {
-    message("Loading composite file: ", composite.file)
-    dir.reads <- get(load(composite.file))
+  if (!is.null(composite.file)) {
+    if (file.exists(composite.file)) {
+      message("Loading composite file: ", composite.file)
+      dir.reads <- get(load(composite.file))
+    } else {
+      warning("User defined 'composite.file' doesn't exists !!!")
+    }  
   } else if (!is.null(breakpointR.data) & file.exists(breakpointR.data)) {
     ## Load breakpointR.data and create a composite file
     breakp.data <- list.files(breakpointR.data, full.names = TRUE)
