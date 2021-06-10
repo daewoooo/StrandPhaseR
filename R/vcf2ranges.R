@@ -56,29 +56,42 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
 #' @param genome A reference genome used by \link[VariantAnnotation]{readVcfAsVRanges} function. [e.g. 'hg38' - human]
 #' @param phased If set to \code{TRUE} all unphased variants are removed.
 #' @param region A \code{\link{GRanges}} object of genomic regions to be loaded from input VCF file.
+#' @param sample A user defined set of sample IDs to be loaded.
 #' @importFrom tidyr separate
 #' @importFrom VariantAnnotation readVcfAsVRanges ScanVcfParam
 #' @return A \code{\link{VRanges-class}} object.
 #' @author David Porubsky
 #' @export
 #' 
-vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38', phased=FALSE, region=NULL) {
+vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38', phased=FALSE, region=NULL, sample=NULL) {
+  ## Get VCF samples
+  vcf.samples <- VariantAnnotation::samples(VariantAnnotation::scanVcfHeader(vcfFile))
+  ## Subset VCF samples 
+  if (is.null(sample)) {
+    sample <- vcf.samples
+  } 
+  sample2load <- intersect(sample, vcf.samples)
+  if (length(sample2load) == 0) {
+    warning("User defined sample ID(s) '", sample, "' not present in submitted VCF file, loading whole VCF file ...")
+    sample2load <- vcf.samples
+  }
+  
   ## Load vcf file into vranges object
   if (!is.null(region)) {
     if (all(is.character(genoField) & nchar(genoField) > 0)) {
       suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
-                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField, which = region)) )
+                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField, which = region, samples = sample2load)) )
     } else {
       suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
-                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, which = region)) )
+                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, which = region, samples = sample2load)) )
     }
   } else {
     if (all(is.character(genoField) & nchar(genoField) > 0)) {
       suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
-                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField)) )
+                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, geno = genoField, samples = sample2load)) )
     } else {
       suppressWarnings( vcf.vranges <- VariantAnnotation::readVcfAsVRanges(x = vcfFile, genome = genome, 
-                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA)) )
+                                                                           param = VariantAnnotation::ScanVcfParam(fixed=c('ALT'), info = NA, samples = sample2load)) )
     }
   }  
   ## Remove unhased variants
