@@ -105,11 +105,11 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   if (translateBases) {
     allele1 <- rep(".", length(vcf.vranges))
     allele2 <- rep(".", length(vcf.vranges))
-    allele1[gen.field$H1 == 0] <- ref(vcf.vranges)[gen.field$H1 == 0]
-    allele1[gen.field$H1 == 1] <- alt(vcf.vranges)[gen.field$H1 == 1]
+    allele1[gen.field$H1 == 0] <- VariantAnnotation::ref(vcf.vranges)[gen.field$H1 == 0]
+    allele1[gen.field$H1 == 1] <- VariantAnnotation::alt(vcf.vranges)[gen.field$H1 == 1]
     allele1[allele1 == "."] <- 'N'
-    allele2[gen.field$H2 == 0] <- ref(vcf.vranges)[gen.field$H2 == 0]
-    allele2[gen.field$H2 == 1] <- alt(vcf.vranges)[gen.field$H2 == 1]
+    allele2[gen.field$H2 == 0] <- VariantAnnotation::ref(vcf.vranges)[gen.field$H2 == 0]
+    allele2[gen.field$H2 == 1] <- VariantAnnotation::alt(vcf.vranges)[gen.field$H2 == 1]
     allele2[allele2 == "."] <- 'N'
     gen.field$H1 <- allele1
     gen.field$H2 <- allele2
@@ -122,7 +122,7 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   ## Construct final VRanges object
   mcols(vcf.vranges) <- gen.field
   ## Keep only seqlevels present in the final VRanges object
-  vcf.vranges <- keepSeqlevels(vcf.vranges, value = runValue(seqnames(vcf.vranges)))
+  vcf.vranges <- GenomeInfoDb::keepSeqlevels(vcf.vranges, value = S4Vectors::runValue(GenomeInfoDb::seqnames(vcf.vranges)))
   
   return(vcf.vranges)
 } 

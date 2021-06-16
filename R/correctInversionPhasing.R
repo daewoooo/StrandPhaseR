@@ -27,7 +27,7 @@
 #' @author David Porubsky
 #' @export
 #'
-correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=NULL, recall.phased=FALSE, het.genotype='strict', chromosomes=NULL, snv.positions=NULL, composite.file=NULL, breakpointR.data=NULL, strandphaseR.data=NULL, pairedEndReads=TRUE, min.mapq=10, vcfs.files=NULL, lookup.bp=1000000, lookup.blacklist=NULL, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=TRUE, overwrite.results=TRUE) {
+correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=NULL, recall.phased=FALSE, het.genotype='strict', chromosomes=NULL, snv.positions=NULL, composite.file=NULL, breakpointR.data=NULL, strandphaseR.data=NULL, pairedEndReads=TRUE, min.mapq=10, background=0.05, vcfs.files=NULL, lookup.bp=1000000, lookup.blacklist=NULL, bsGenome=NULL, ref.fasta=NULL, assume.biallelic=TRUE, overwrite.results=TRUE) {
   
   ## Check user input ##
   ######################
@@ -113,7 +113,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
                                                peakTh = 0.33, 
                                                binMethod = "size", 
                                                genoT = 'binom',
-                                               background = 0.05, 
+                                               background = background, 
                                                minReads = 50)
     break.regions <- breakpoints$counts
     inv.gr <- break.regions[break.regions$states != 'cc']
@@ -159,7 +159,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
                                                    peakTh = 0.33, 
                                                    binMethod = "size", 
                                                    genoT = 'binom',
-                                                   background = 0.05, 
+                                                   background = background, 
                                                    minReads = 50)
       detected.ranges <- breakp.phased$counts
       ## Report regions that are genotyped as purely WW or CC as those point to likely HET inversions
