@@ -10,7 +10,8 @@ vcf2vranges(
   translateBases = TRUE,
   genome = "hg38",
   phased = FALSE,
-  region = NULL
+  region = NULL,
+  sample = NULL
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ vcf2vranges(
 \item{phased}{If set to \code{TRUE} all unphased variants are removed.}
 
 \item{region}{A \code{\link{GRanges}} object of genomic regions to be loaded from input VCF file.}
+
+\item{sample}{A user defined set of sample IDs to be loaded.}
 }
 \value{
 A \code{\link{VRanges-class}} object.

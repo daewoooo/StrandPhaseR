@@ -17,6 +17,7 @@ correctInvertedRegionPhasing(
   strandphaseR.data = NULL,
   pairedEndReads = TRUE,
   min.mapq = 10,
+  background = 0.05,
   vcfs.files = NULL,
   lookup.bp = 1e+06,
   lookup.blacklist = NULL,
