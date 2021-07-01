@@ -184,7 +184,9 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
       ## If 'recall.phased' set to TRUE try to use ranges defined by breakpoint calling on phased reads
       if (recall.phased) {
         gr <- IRanges::subsetByOverlaps(het.inv.gr, roi.gr) 
-        if (length(gr) > 0) {
+        ## Calculate what portion of the original range 
+        shared.width <- max(width(intersect(roi.gr, gr)) / width(roi.gr), 0)
+        if (length(gr) > 0 & shared.width > 0.9) {
           roi.phased.reads <- IRanges::subsetByOverlaps(phased.reads, range(gr))
         } else {
           roi.phased.reads <- IRanges::subsetByOverlaps(phased.reads, roi.gr)
@@ -198,11 +200,11 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
       ## Genotype roi directional reads
       wReads <- roi.dir.reads[GenomicRanges::strand(roi.dir.reads) == '-']
       cReads <- roi.dir.reads[GenomicRanges::strand(roi.dir.reads) == '+']
-      dir.reads.genot <- breakpointR::genotype.binom(wReads=length(wReads), cReads=length(cReads), background=0.05, minReads=10, log=TRUE)
+      dir.reads.genot <- breakpointR::genotype.binom(wReads=length(wReads), cReads=length(cReads), background=background, minReads=10, log=TRUE)
       ## Genotype roi phased reads
       wReads <- roi.phased.reads[strand(roi.phased.reads) == '-']
       cReads <- roi.phased.reads[strand(roi.phased.reads) == '+']
-      phased.reads.genot <- breakpointR::genotype.binom(wReads=length(wReads), cReads=length(cReads), background=0.05, minReads=10, log=TRUE)
+      phased.reads.genot <- breakpointR::genotype.binom(wReads=length(wReads), cReads=length(cReads), background=background, minReads=10, log=TRUE)
       ## Get inversion genotype
       if (!is.na(dir.reads.genot$bestFit) & !is.na(phased.reads.genot$bestFit)) {
         ## Defined if inversion is homozygous (HOM)
