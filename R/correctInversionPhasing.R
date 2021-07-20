@@ -341,7 +341,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
 #' This function takes as an input region deemed to be a heterozygous inversion and attempts to phase SNVs inside this region using
 #' haplotype informative Strand-seq reads from multiple single cells.
 #' 
-#' @param phase.gr A \code{\link{GRanges}} object of region to be phased. This region should point to a heterozygous inversion site.
+#' @param phase.gr A \code{\link{GRanges}} object containing a single region to be phased. This region should point to a heterozygous inversion site.
 #' @param lookup.bp A number of nucleotides, downstream and upstream, from the heterozygous inversion site ('phase.gr') to be genotyped.
 #' @param lookup.blacklist A \code{\link{GRanges}} object or a path to a BED file containing a set of ranges to be excluded 
 #' when extending 'phase.gr' by 'lookup.bp'. The total size of 'lookup.bp' is kept after filtering.
@@ -387,8 +387,16 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
   
   ## Get SNV positions for a region defined in 'phase.gr'
   if (!is.null(snv.positions)) {
-    snvs <- suppressMessages( vcf2ranges(vcfFile=snv.positions, genotypeField=1, chromosome = chromosome) )
+    if (grepl(snv.positions, pattern = 'vcf')) {
+      snvs <- suppressMessages( vcf2ranges(vcfFile=snv.positions, genotypeField=1, chromosome = chromosome) )
+    } else if (grepl(snv.positions, pattern = 'bed')) {
+      snvs <- read.table(snv.positions, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
+      snvs <- GenomicRanges::GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
+    } else {
+      stop("Required parameter 'snv.positions' not defined in one of the allowed formats [vcf, bed] !!!")
+    } 
     region.snvs <- IRanges::subsetByOverlaps(snvs, phase.gr)
+    region.snvs <- GenomeInfoDb::keepSeqlevels(region.snvs, value = as.character(unique(seqnames(region.snvs))))
     ## Remove duplicated SNV positions
     region.snvs <- region.snvs[!duplicated(region.snvs)]
   } else {
@@ -554,10 +562,10 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       ref.allele <- rep('.', times=length(pos.gen))
       ref.allele[match(ref.bases.idx, pos.idx)] <- ref.bases
       
+      ## Extract reference alleles from the reference bsgenome object if available
+      snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, IRanges(start=pos.gen, end=pos.gen))
       ## Assign reference and alternative alleles
       if (!is.null(bsGenome)) {
-        ## Extract reference alleles from the reference bsgenome object if available
-        snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, IRanges(start=pos.gen, end=pos.gen))
         ref.base <- Biostrings::Views(bsGenome, snv.ranges)
         ref.base <- as(ref.base, "DNAStringSet")
         ref.base <- as(ref.base, "vector")
@@ -841,3 +849,4 @@ sliceRanges <- function(gr, slice.size=1000000, from='start') {
   }  
   return(gr.sub)
 }
+
