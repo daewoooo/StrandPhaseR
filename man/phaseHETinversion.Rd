@@ -23,7 +23,7 @@ phaseHETinversion(
 
 \item{snv.positions}{A path to a VCF files containing SNV positions to phase.}
 
-\item{phase.gr}{A \code{\link{GRanges}} object of region to be phased. This region should point to a heterozygous inversion site.}
+\item{phase.gr}{A \code{\link{GRanges}} object containing a single region to be phased. This region should point to a heterozygous inversion site.}
 
 \item{lookup.bp}{A number of nucleotides, downstream and upstream, from the heterozygous inversion site ('phase.gr') to be genotyped.}
 

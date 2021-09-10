@@ -76,7 +76,11 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
     dir.reads <- breakpointR::synchronizeReadDir(files2sync = breakp.data)
   } else {
     stop("Required parameters 'composite.file' or 'breakpointR.data' are not defined or files doesn't exists, aborting ...")
-  }  
+  }
+  ## Filter by mapping quality
+  if (min.mapq > 0) {
+    dir.reads <- dir.reads[dir.reads$mapq >= min.mapq]
+  }
   
   ## Abort function execution if strandphaseR.data are not defined
   if (is.null(strandphaseR.data) & !file.exists(strandphaseR.data)) {
@@ -150,6 +154,10 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
     strand(reads$hap2) <- "-" ## HAP2 == WATSON
     phased.reads <- c(reads$hap1, reads$hap2)
     phased.reads <- GenomicRanges::sort(phased.reads, ignore.strand=TRUE)
+    ## Filter by mapping quality
+    if (min.mapq > 0) {
+      phased.reads <- phased.reads[phased.reads$mapq >= min.mapq]
+    }
     
     if (recall.phased) {
       breakp.phased <- breakpointR::runBreakpointr(bamfile = phased.reads, 
@@ -183,10 +191,10 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
       roi.dir.reads <- IRanges::subsetByOverlaps(dir.reads, roi.gr)
       ## If 'recall.phased' set to TRUE try to use ranges defined by breakpoint calling on phased reads
       if (recall.phased) {
-        gr <- IRanges::subsetByOverlaps(het.inv.gr, roi.gr) 
+        gr <- IRanges::subsetByOverlaps(het.inv.gr, roi.gr)
         ## Calculate what portion of the original range 
         shared.width <- max(width(intersect(roi.gr, gr)) / width(roi.gr), 0)
-        if (length(gr) > 0 & shared.width > 0.9) {
+        if (length(gr) > 0 & shared.width >= 0.9) {
           roi.phased.reads <- IRanges::subsetByOverlaps(phased.reads, range(gr))
         } else {
           roi.phased.reads <- IRanges::subsetByOverlaps(phased.reads, roi.gr)
@@ -235,7 +243,14 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
         if (recall.phased) {
           het.gr <- IRanges::subsetByOverlaps(het.inv.gr, roi.gr) 
           if (length(gr) > 0) {
-            het.gr <- range(het.gr)
+            het.range <- range(het.gr)
+            ## Calculate what portion of the original range 
+            shared.width <- max(width(intersect(roi.gr, het.range)) / width(roi.gr), 0)
+            if (length(het.range) > 0 & shared.width >= 0.9) {
+              het.gr <- range(het.gr)
+            } else {
+              het.gr <- roi.gr
+            }  
           } else {
             het.gr <- roi.gr
           }

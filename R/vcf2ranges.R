@@ -113,6 +113,9 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
     allele2[allele2 == "."] <- 'N'
     gen.field$H1 <- allele1
     gen.field$H2 <- allele2
+  } else {
+    gen.field$H1[gen.field$H1 == ''] <- '.'
+    gen.field$H2[gen.field$H2 == ''] <- '.'
   }
   
   if (!phased) {
