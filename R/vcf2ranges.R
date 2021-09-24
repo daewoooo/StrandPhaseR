@@ -111,12 +111,11 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
     allele2[gen.field$H2 == 0] <- VariantAnnotation::ref(vcf.vranges)[gen.field$H2 == 0]
     allele2[gen.field$H2 == 1] <- VariantAnnotation::alt(vcf.vranges)[gen.field$H2 == 1]
     allele2[allele2 == "."] <- 'N'
-    gen.field$H1 <- allele1
-    gen.field$H2 <- allele2
-  } else {
-    gen.field$H1[gen.field$H1 == ''] <- '.'
-    gen.field$H2[gen.field$H2 == ''] <- '.'
-  }
+    gen.field$H1.base <- allele1
+    gen.field$H2.base <- allele2
+  } 
+  gen.field$H1[gen.field$H1 == ''] <- '.'
+  gen.field$H2[gen.field$H2 == ''] <- '.'
   
   if (!phased) {
     colnames(gen.field) <- c('allele1', 'allele2')
