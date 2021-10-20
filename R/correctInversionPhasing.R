@@ -632,7 +632,6 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
 #' @param vcf.file A \pkg{\link{StrandPhaseR}} formatted VCF file to be corrected for inversion phasing.
 #' @param ID A unique id to be appended at the end of each corrected VCF file.
 #' @importFrom VariantAnnotation readVcfAsVRanges ScanVcfParam
-#' @inheritParams correctInvertedRegionPhasing
 #' @return \code{NULL}
 #' @author David Porubsky
 #' @export

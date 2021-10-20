@@ -57,6 +57,7 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
 #' @param phased If set to \code{TRUE} all unphased variants are removed.
 #' @param region A \code{\link{GRanges}} object of genomic regions to be loaded from input VCF file.
 #' @param sample A user defined set of sample IDs to be loaded.
+#' @importFrom Rsamtools indexTabix bgzip
 #' @importFrom tidyr separate
 #' @importFrom VariantAnnotation readVcfAsVRanges ScanVcfParam
 #' @return A \code{\link{VRanges-class}} object.
@@ -64,18 +65,33 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
 #' @export
 #' 
 vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genome='hg38', phased=FALSE, region=NULL, sample=NULL) {
+  ## Check if VCF file exists along with corresponding TABIX file
+  if (file.exists(vcfFile)) {
+    vcfFile.tbi <- paste0(vcfFile, '.tbi')
+    if (!is.null(region) & !file.exists(vcfFile.tbi)) {
+      message(paste0("        Inderxing VCF file: ", vcfFile))
+      ## Make sure  the VCF file is bgzipped
+      to <- tempfile()
+      vcfFile <- Rsamtools::bgzip(vcfFile, to)
+      idx <- Rsamtools::indexTabix(vcfFile, "vcf")
+      #tab <- Rsamtools::TabixFile(vcfFile, idx)
+    }
+  } else {
+    stop("VCF file: ", popul.vcf, " doesn't exists, quitting ...")
+  }
+  
   ## Get VCF samples
   vcf.samples <- VariantAnnotation::samples(VariantAnnotation::scanVcfHeader(vcfFile))
   ## Subset VCF samples 
   if (is.null(sample)) {
     sample <- vcf.samples
-  } 
-  sample2load <- intersect(sample, vcf.samples)
-  if (length(sample2load) == 0) {
-    warning("User defined sample ID(s) '", sample, "' not present in submitted VCF file, loading whole VCF file ...")
-    sample2load <- vcf.samples
+  } else {
+    sample2load <- intersect(sample, vcf.samples)
+    if (length(sample2load) == 0) {
+      warning("User defined sample ID(s) '", sample, "' not present in submitted VCF file, loading whole VCF file ...")
+      sample2load <- vcf.samples
+    }
   }
-  
   ## Load vcf file into vranges object
   if (!is.null(region)) {
     if (all(is.character(genoField) & nchar(genoField) > 0)) {
@@ -117,14 +133,22 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   gen.field$H1[gen.field$H1 == ''] <- '.'
   gen.field$H2[gen.field$H2 == ''] <- '.'
   
-  if (!phased) {
-    colnames(gen.field) <- c('allele1', 'allele2')
-  }
+  # if (!phased) {
+  #   colnames(gen.field) <- c('allele1', 'allele2')
+  # }
   
   ## Construct final VRanges object
   mcols(vcf.vranges) <- gen.field
   ## Keep only seqlevels present in the final VRanges object
   vcf.vranges <- GenomeInfoDb::keepSeqlevels(vcf.vranges, value = S4Vectors::runValue(GenomeInfoDb::seqnames(vcf.vranges)))
+  
+  ## Clean TMP dir if created
+  if (file.exists(to)) {
+    file.remove(to)
+  }  
+  if (file.exists(idx)) {
+    file.remove(idx)
+  }  
   
   return(vcf.vranges)
 } 
