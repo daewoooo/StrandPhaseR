@@ -32,17 +32,22 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
   ## Check user input ##
   ######################
   ## Check if set of inverted regions is defined
-  if (!is.null(inv.bed) & file.exists(inv.bed)) {
-    ## Load set of inverted regions
-    inv.df <- utils::read.table(file = inv.bed, header = FALSE, stringsAsFactors = FALSE)
-    colnames(inv.df)[c(1:3)] <- c('seqnames', 'start', 'end')
-    inv.gr <- makeGRangesFromDataFrame(df = inv.df)
-    call.inversion <- FALSE
+  if (!is.null(inv.bed)) {
+    if  (file.exists(inv.bed)) {
+      ## Load set of inverted regions
+      inv.df <- utils::read.table(file = inv.bed, header = FALSE, stringsAsFactors = FALSE)
+      colnames(inv.df)[c(1:3)] <- c('seqnames', 'start', 'end')
+      inv.gr <- makeGRangesFromDataFrame(df = inv.df)
+      call.inversion <- FALSE
+    } else {
+      message("Parameter 'inv.bed' is not specified or given file doesn't exists.\nLikely inverted regions will be called de novo.")
+      call.inversion <- TRUE
+      recall.phased <- TRUE
+    }
   } else {
-    message("Parameter 'inv.bed' is not specified or given file doesn't exists.\nLikely inverted regions will be called de novo.")
     call.inversion <- TRUE
     recall.phased <- TRUE
-  } 
+  }  
   
   ## Check input format of blacklisted regions and load a BED file if needed
   if (!is.null(lookup.blacklist) & !class(lookup.blacklist) == 'GRanges') {
@@ -113,7 +118,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
     breakpoints <- breakpointR::runBreakpointr(bamfile = dir.reads, 
                                                pairedEndReads = pairedEndReads, 
                                                chromosomes = chromosomes,
-                                               windowsize = 5000, 
+                                               windowsize = 10000, 
                                                peakTh = 0.33, 
                                                binMethod = "size", 
                                                genoT = 'binom',
@@ -150,9 +155,11 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
     ## Load strandphaseR.data and create a composite phased file (per chromosome)
     phased.data.chr <- file.path(strandphaseR.data, paste0(chr, '_reads.RData'))
     reads <- get(load(phased.data.chr))
-    strand(reads$hap1) <- "+" ## HAP1 == CRICK
-    strand(reads$hap2) <- "-" ## HAP2 == WATSON
-    phased.reads <- c(reads$hap1, reads$hap2)
+    hap1.reads <- reads[['hap1']]
+    hap2.reads <- reads[['hap2']]
+    GenomicRanges::strand(hap1.reads) <- "+" ## HAP1 == CRICK
+    GenomicRanges::strand(hap2.reads) <- "-" ## HAP2 == WATSON
+    phased.reads <- c(hap1.reads, hap2.reads)
     phased.reads <- GenomicRanges::sort(phased.reads, ignore.strand=TRUE)
     ## Filter by mapping quality
     if (min.mapq > 0) {
@@ -187,13 +194,14 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
     #######################################
     for (j in seq_along(inv.gr.chr)) {
       roi.gr <- inv.gr.chr[j]
+      roi.gr <- GenomeInfoDb::keepSeqlevels(roi.gr, value = seqnames(roi.gr))
       ## Get directional and phased reads for a given region
       roi.dir.reads <- IRanges::subsetByOverlaps(dir.reads, roi.gr)
       ## If 'recall.phased' set to TRUE try to use ranges defined by breakpoint calling on phased reads
       if (recall.phased) {
         gr <- IRanges::subsetByOverlaps(het.inv.gr, roi.gr)
         ## Calculate what portion of the original range 
-        shared.width <- max(width(intersect(roi.gr, gr)) / width(roi.gr), 0)
+        shared.width <- max(GenomicRanges::width(GenomicRanges::intersect(roi.gr, gr)) / GenomicRanges::width(roi.gr), 0)
         if (length(gr) > 0 & shared.width >= 0.9) {
           roi.phased.reads <- IRanges::subsetByOverlaps(phased.reads, range(gr))
         } else {
@@ -206,12 +214,12 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
       ## Remove pileup spikes in coverage
       roi.dir.reads <- breakpointR::removeReadPileupSpikes(gr = roi.dir.reads, max.pileup = 10)
       ## Genotype roi directional reads
-      wReads <- roi.dir.reads[GenomicRanges::strand(roi.dir.reads) == '-']
-      cReads <- roi.dir.reads[GenomicRanges::strand(roi.dir.reads) == '+']
+      wReads <- roi.dir.reads[as.character(GenomicRanges::strand(roi.dir.reads)) == '-']
+      cReads <- roi.dir.reads[as.character(GenomicRanges::strand(roi.dir.reads)) == '+']
       dir.reads.genot <- breakpointR::genotype.binom(wReads=length(wReads), cReads=length(cReads), background=background, minReads=10, log=TRUE)
       ## Genotype roi phased reads
-      wReads <- roi.phased.reads[strand(roi.phased.reads) == '-']
-      cReads <- roi.phased.reads[strand(roi.phased.reads) == '+']
+      wReads <- roi.phased.reads[as.character(GenomicRanges::strand(roi.phased.reads)) == '-']
+      cReads <- roi.phased.reads[as.character(GenomicRanges::strand(roi.phased.reads)) == '+']
       phased.reads.genot <- breakpointR::genotype.binom(wReads=length(wReads), cReads=length(cReads), background=background, minReads=10, log=TRUE)
       ## Get inversion genotype
       if (!is.na(dir.reads.genot$bestFit) & !is.na(phased.reads.genot$bestFit)) {
@@ -245,7 +253,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
           if (length(gr) > 0) {
             het.range <- range(het.gr)
             ## Calculate what portion of the original range 
-            shared.width <- max(width(intersect(roi.gr, het.range)) / width(roi.gr), 0)
+            shared.width <- max(GenomicRanges::width(GenomicRanges::intersect(roi.gr, het.range)) / GenomicRanges::width(roi.gr), 0)
             if (length(het.range) > 0 & shared.width >= 0.9) {
               het.gr <- range(het.gr)
             } else {
@@ -423,8 +431,8 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
     ## Loop over all BAM files and select cells with WC genotype over region of interest
     file.list <- list.files(path = input.bams, pattern = '\\.bam$', full.names = TRUE) 
     
-    inv.reads <- GenomicRanges::GRangesList()
-    ref.reads <- GenomicRanges::GRangesList()
+    inv.reads <- list()
+    ref.reads <- list()
     for (i in seq_along(file.list)) {
       bamfile <- file.list[i]
       bamfile.name <- basename(bamfile)
@@ -482,8 +490,10 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
         ref.reads[[length(ref.reads) + 1]] <- bam.reads[strand(bam.reads) == '+']
       }
     }
-    inv.reads <- unlist(inv.reads, use.names = FALSE)
-    ref.reads <- unlist(ref.reads, use.names = FALSE)
+    #inv.reads <- unlist(inv.reads, use.names = FALSE)
+    #ref.reads <- unlist(ref.reads, use.names = FALSE)
+    inv.reads <- do.call(c, inv.reads)
+    ref.reads <- do.call(c, ref.reads)
     
     if (length(inv.reads) != 0 & length(ref.reads) != 0) {
       ## Make sure only reads from a chromosome in phase.gr are kept
@@ -660,6 +670,9 @@ correctHomInv <- function(correct.gr=NULL, vcf.file=NULL, ID='') {
   vcf.data$P2[is.na(vcf.data$P2)] <- '0'
   
   ## Flip haplotypes overlapping HOM inversion
+  seq.len <- c(seqlengths(correct.gr), seqlengths(vcf.data))
+  seqlengths(correct.gr) <- max(seq.len[!is.na(seq.len)])
+  seqlengths(vcf.data) <- max(seq.len[!is.na(seq.len)])
   hits <- IRanges::findOverlaps(vcf.data, correct.gr, type = 'within')
   snv.idx <- S4Vectors::queryHits(hits)
   gt.toFlip <- vcf.data$GT[snv.idx]
@@ -730,6 +743,9 @@ correctHetInv <- function(correct.gr=NULL, vcf.file=NULL, het.haps=NULL, ID='') 
     vcf.data$P2[is.na(vcf.data$P2)] <- '0'
     
     ## Remove SNVs overlapping with HET inversion
+    seq.len <- c(seqlengths(correct.gr), seqlengths(vcf.data))
+    seqlengths(correct.gr) <- max(seq.len[!is.na(seq.len)])
+    seqlengths(vcf.data) <- max(seq.len[!is.na(seq.len)])
     hits <- IRanges::findOverlaps(vcf.data, correct.gr, type = 'within')
     snv.idx <- S4Vectors::queryHits(hits)
     if (length(snv.idx) > 0) {

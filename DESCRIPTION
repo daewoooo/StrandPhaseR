@@ -42,4 +42,4 @@ LazyLoad: yes
 VignetteBuilder: knitr
 biocViews: Software, Sequencing, Haplotyping
 URL: https://github.com/daewoooo/StrandPhaseR
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
