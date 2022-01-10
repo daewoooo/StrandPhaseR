@@ -622,7 +622,8 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
         inv.allele[inv.phase == '0'] <- ref.base[inv.phase == '0']
         ref.allele[ref.phase == '0'] <- ref.base[ref.phase == '0']
       }  
-      phased.df <- data.frame(pos.gen=pos.gen, ref.allele=ref.allele, inv.allele=inv.allele, ref.phase=ref.phase, inv.phase=inv.phase, ref.base=ref.base)
+      phased.df <- data.frame(pos.gen=pos.gen, ref.allele=ref.allele, inv.allele=inv.allele, ref.phase=ref.phase, inv.phase=inv.phase, ref.base=ref.base, 
+                              stringsAsFactors = FALSE)
     } else {
       phased.df <- NULL
     }
