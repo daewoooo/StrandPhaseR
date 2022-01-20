@@ -18,14 +18,15 @@ To install the development version from Github, follow the steps given below. Th
 2. Optional: For ease of use, install Rstudio from https://www.rstudio.com/
 3. Open R and install all dependencies. Please ensure that you have writing permissions to install packages. Execute the following lines one by one:
 
-   	install.packages("devtools")
+  install.packages("devtools")
 	source("http://bioconductor.org/biocLite.R")
 	biocLite("GenomicRanges")
 	biocLite("GenomicAlignments")
 	library(devtools)
+	To install published version of the package:
 	install_github("daewoooo/StrandPhaseR")
-	Or alternatively if the above line doesn't work:
-	install_git("git://github.com/daewoooo/StrandPhaseR.git", branch = "master")
+	To install developmental version of the package:
+	install_github("daewoooo/StrandPhaseR", ref = "devel")
 
 ## How to use StrandPhaseR
 
@@ -33,10 +34,12 @@ To install the development version from Github, follow the steps given below. Th
 2. Load StrandPhaseR package:	library('StrandPhaseR')
 3. Run StrandPhaseR: 	strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, chromosomes = <chromosomes2analyze>) or use config file as follows strandPhaseR(inputfolder = <input_folder>, outputfolder = <output_folder>, positions = <SNV_positions>, WCregions = <haplotypeInformative_WCregions>, configfile = <config_file>)
 
+More information on how to use StrandPhaseR for phasing can be found [here](http://hdl.handle.net/2429/80678).
+
 ### Report Errors
 
 If you encounter errors of any kind, please report an [issue here](https://github.com/daewoooo/StrandPhaseR/issues/new).
 
 ### NOTE
 
-The latest version of StrandPhaseR includes recent unpublished work. To avoid any conflict of interest please consult usage for publication with the author.
+The developemtal (branch 'devel') version of StrandPhaseR includes recent unpublished work. To avoid any conflict of interest please consult usage for publication with the author.
