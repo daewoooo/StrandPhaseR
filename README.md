@@ -18,15 +18,19 @@ To install the development version from Github, follow the steps given below. Th
 2. Optional: For ease of use, install Rstudio from https://www.rstudio.com/
 3. Open R and install all dependencies. Please ensure that you have writing permissions to install packages. Execute the following lines one by one:
 
-  install.packages("devtools")
-	source("http://bioconductor.org/biocLite.R")
-	biocLite("GenomicRanges")
-	biocLite("GenomicAlignments")
-	library(devtools)
-	To install published version of the package:
-	install_github("daewoooo/StrandPhaseR")
-	To install developmental version of the package:
-	install_github("daewoooo/StrandPhaseR", ref = "devel")
+   #### To install required packages  
+   if (!requireNamespace("BiocManager", quietly=TRUE))
+   install.packages("BiocManager")
+   install("GenomicRanges") 
+	 install("GenomicAlignments")
+	 install.packages("devtools")
+	 library(devtools) 
+
+4. To install StrandPhaseR package from github	 
+	 #### To install published version of the package:
+   install_github("daewoooo/StrandPhaseR")
+   #### To install developmental version of the package:
+   install_github("daewoooo/StrandPhaseR", ref = "devel")
 
 ## How to use StrandPhaseR
 
