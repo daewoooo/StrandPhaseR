@@ -84,7 +84,7 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   vcf.samples <- VariantAnnotation::samples(VariantAnnotation::scanVcfHeader(vcfFile))
   ## Subset VCF samples 
   if (is.null(sample)) {
-    sample <- vcf.samples
+    sample2load <- vcf.samples
   } else {
     sample2load <- intersect(sample, vcf.samples)
     if (length(sample2load) == 0) {
@@ -143,10 +143,8 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   vcf.vranges <- GenomeInfoDb::keepSeqlevels(vcf.vranges, value = S4Vectors::runValue(GenomeInfoDb::seqnames(vcf.vranges)))
   
   ## Clean TMP dir if created
-  if (file.exists(to)) {
+  if (!is.null(region) & !file.exists(vcfFile.tbi)) {
     file.remove(to)
-  }  
-  if (file.exists(idx)) {
     file.remove(idx)
   }  
   
