@@ -33,7 +33,8 @@ Imports:
   bamsignals,
   breakpointR,
   methods,
-  dplyr
+  dplyr,
+  magrittr
 Suggests:
   knitr,
   testthat
