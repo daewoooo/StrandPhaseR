@@ -194,7 +194,7 @@ correctInvertedRegionPhasing <- function(input.bams, outputfolder=NULL, inv.bed=
     #######################################
     for (j in seq_along(inv.gr.chr)) {
       roi.gr <- inv.gr.chr[j]
-      roi.gr <- GenomeInfoDb::keepSeqlevels(roi.gr, value = seqnames(roi.gr))
+      roi.gr <- GenomeInfoDb::keepSeqlevels(roi.gr, value = GenomeInfoDb::seqnames(roi.gr))
       ## Get directional and phased reads for a given region
       roi.dir.reads <- IRanges::subsetByOverlaps(dir.reads, roi.gr)
       ## If 'recall.phased' set to TRUE try to use ranges defined by breakpoint calling on phased reads
@@ -406,7 +406,7 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
   }
   
   ## Get chromosome name from 'phase.gr' object
-  chromosome <- as.character(unique(seqnames(phase.gr)))
+  chromosome <- as.character(unique(GenomeInfoDb::seqnames(phase.gr)))
   
   ## Get SNV positions for a region defined in 'phase.gr'
   if (!is.null(snv.positions)) {
@@ -414,12 +414,12 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       snvs <- suppressMessages( vcf2ranges(vcfFile=snv.positions, genotypeField=1, chromosome = chromosome) )
     } else if (grepl(snv.positions, pattern = 'bed')) {
       snvs <- read.table(snv.positions, sep = '\t', header = FALSE, stringsAsFactors = FALSE)
-      snvs <- GenomicRanges::GRanges(seqnames=snvs$V1, IRanges(start=snvs$V2, end=snvs$V2))
+      snvs <- GenomicRanges::GRanges(seqnames=snvs$V1, ranges=IRanges::IRanges(start=snvs$V2, end=snvs$V2))
     } else {
       stop("Required parameter 'snv.positions' not defined in one of the allowed formats [vcf, bed] !!!")
     } 
     region.snvs <- IRanges::subsetByOverlaps(snvs, phase.gr)
-    region.snvs <- GenomeInfoDb::keepSeqlevels(region.snvs, value = as.character(unique(seqnames(region.snvs))))
+    region.snvs <- GenomeInfoDb::keepSeqlevels(region.snvs, value = as.character(unique(GenomeInfoDb::seqnames(region.snvs))))
     ## Remove duplicated SNV positions
     region.snvs <- region.snvs[!duplicated(region.snvs)]
   } else {
@@ -447,7 +447,7 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       ## Account for blacklisted regions
       if (!is.null(lookup.blacklist)) {
         downANDupsteam <- GenomicRanges::gaps(phase.gr)
-        downANDupsteam <- downANDupsteam[strand(downANDupsteam ) == '*']
+        downANDupsteam <- downANDupsteam[GenomicRanges::strand(downANDupsteam ) == '*']
         unique <- suppressWarnings( GenomicRanges::setdiff(downANDupsteam, lookup.blacklist) )
         hits <- IRanges::findOverlaps(unique, downANDupsteam)
         unique.grl <- GenomicRanges::split(unique, subjectHits(hits))
@@ -483,11 +483,11 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       
       ## Store phased reads
       if (flanks.genot$bestFit == 'ww') {
-        inv.reads[[length(inv.reads) + 1]] <- bam.reads[strand(bam.reads) == '+']
-        ref.reads[[length(ref.reads) + 1]] <- bam.reads[strand(bam.reads) == '-']
+        inv.reads[[length(inv.reads) + 1]] <- bam.reads[GenomicRanges::strand(bam.reads) == '+']
+        ref.reads[[length(ref.reads) + 1]] <- bam.reads[GenomicRanges::strand(bam.reads) == '-']
       } else if (flanks.genot$bestFit == 'cc') {
-        inv.reads[[length(inv.reads) + 1]] <- bam.reads[strand(bam.reads) == '-']
-        ref.reads[[length(ref.reads) + 1]] <- bam.reads[strand(bam.reads) == '+']
+        inv.reads[[length(inv.reads) + 1]] <- bam.reads[GenomicRanges::strand(bam.reads) == '-']
+        ref.reads[[length(ref.reads) + 1]] <- bam.reads[GenomicRanges::strand(bam.reads) == '+']
       }
     }
     #inv.reads <- unlist(inv.reads, use.names = FALSE)
@@ -509,8 +509,8 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       #ref.reads.qual <- mcols(ref.reads)$qual
       
       ## get piles of bases at each variable position
-      piles.inv.reads <- GenomicAlignments::pileLettersAt(inv.reads.seq, seqnames(inv.reads), start(inv.reads), mcols(inv.reads)$cigar, region.snvs)
-      piles.ref.reads <- GenomicAlignments::pileLettersAt(ref.reads.seq, seqnames(ref.reads), start(ref.reads), mcols(ref.reads)$cigar, region.snvs)
+      piles.inv.reads <- GenomicAlignments::pileLettersAt(inv.reads.seq, GenomeInfoDb::seqnames(inv.reads), start(inv.reads), mcols(inv.reads)$cigar, region.snvs)
+      piles.ref.reads <- GenomicAlignments::pileLettersAt(ref.reads.seq, GenomeInfoDb::seqnames(ref.reads), start(ref.reads), mcols(ref.reads)$cigar, region.snvs)
       
       ## get piles of qualities at each variable position
       #quals.inv.reads <- GenomicAlignments::pileLettersAt(inv.reads.qual, seqnames(inv.reads), start(inv.reads), mcols(inv.reads)$cigar, region.snvs)
@@ -588,7 +588,7 @@ phaseHETinversion <- function(input.bams=NULL, snv.positions=NULL, phase.gr=NULL
       ref.allele[match(ref.bases.idx, pos.idx)] <- ref.bases
       
       ## Extract reference alleles from the reference bsgenome object if available
-      snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, IRanges(start=pos.gen, end=pos.gen))
+      snv.ranges <- GenomicRanges::GRanges(seqnames=chromosome, ranges=IRanges::IRanges(start=pos.gen, end=pos.gen))
       ## Assign reference and alternative alleles
       if (!is.null(bsGenome)) {
         ref.base <- Biostrings::Views(bsGenome, snv.ranges)
@@ -691,7 +691,7 @@ correctHomInv <- function(correct.gr=NULL, vcf.file=NULL, ID='') {
   cat(unlist(header), sep = '\n', file = destination)
   ## Print corrected phasing
   gt <- apply(mcols(vcf.data), 1, function(x) paste(x, collapse = ':'))
-  print.df <- data.frame(chr=unique(seqnames(vcf.data)),
+  print.df <- data.frame(chr=unique(GenomeInfoDb::seqnames(vcf.data)),
                          pos=start(vcf.data),
                          id=rep('.', length(vcf.data)),
                          ref=VariantAnnotation::ref(vcf.data),
@@ -761,7 +761,7 @@ correctHetInv <- function(correct.gr=NULL, vcf.file=NULL, het.haps=NULL, ID='') 
     ALT <- rep('N', length(gt))
     ALT[het.haps$ref.phase == 1] <- het.haps$ref.allele[het.haps$ref.phase == 1]
     ALT[het.haps$inv.phase == 1] <- het.haps$inv.allele[het.haps$inv.phase == 1]  
-    add.df <- data.frame(chr=unique(seqnames(vcf.data)),
+    add.df <- data.frame(chr=unique(GenomeInfoDb::seqnames(vcf.data)),
                          pos=het.haps$pos.gen,
                          id=rep('.', nrow(het.haps)),
                          ref=REF,
@@ -782,7 +782,7 @@ correctHetInv <- function(correct.gr=NULL, vcf.file=NULL, het.haps=NULL, ID='') 
     cat(unlist(header), sep = '\n', file = destination)
     ## Print corrected phasing
     gt <- apply(mcols(vcf.data), 1, function(x) paste(x, collapse = ':'))
-    print.df <- data.frame(chr=unique(seqnames(vcf.data)),
+    print.df <- data.frame(chr=unique(GenomeInfoDb::seqnames(vcf.data)),
                            pos=start(vcf.data),
                            id=rep('.', length(vcf.data)),
                            ref=VariantAnnotation::ref(vcf.data),
