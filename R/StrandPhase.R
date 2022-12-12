@@ -7,6 +7,7 @@
 #' @import foreach
 #' @import doParallel 
 #' @importFrom Rsamtools scanBamHeader FaFile
+#' @importFrom parallel makeCluster stopCluster
 
 #' @author David Porubsky
 #' @export
@@ -157,7 +158,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
   ## Parallelization ##
   if (conf[['numCPU']] > 1) {
     message("Using ",conf[['numCPU']]," CPUs")
-    cl <- makeCluster(conf[['numCPU']])
+    cl <- parallel::makeCluster(conf[['numCPU']])
     doParallel::registerDoParallel(cl)
   
     message("Phasing chromosomes ...", appendLF=F); ptm <- proc.time()
@@ -190,7 +191,7 @@ strandPhaseR <- function(inputfolder, outputfolder='./StrandPhaseR_analysis', co
         }	
       }		
     }
-    stopCluster(cl)
+    parallel::stopCluster(cl)
     time <- proc.time() - ptm; message(" ",round(time[3],2),"s")  
     
   } else {

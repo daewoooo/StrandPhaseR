@@ -24,6 +24,7 @@ Imports:
   BiocGenerics,
   gtools,
   doParallel,
+  parallel,
   foreach,
   zoo,
   stats,
@@ -38,9 +39,10 @@ Imports:
 Suggests:
   knitr,
   testthat
-License: file LICENSE 
+License: file LICENSE
+Encoding: UTF-8
 LazyLoad: yes
 VignetteBuilder: knitr
 biocViews: Software, Sequencing, Haplotyping
 URL: https://github.com/daewoooo/StrandPhaseR
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.2
