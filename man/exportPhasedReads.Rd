@@ -8,6 +8,7 @@ exportPhasedReads(
   phased.tab = NULL,
   inputfolder = NULL,
   outputfolder = NULL,
+  by.matepair = TRUE,
   min.mapq = 10,
   pairedEndReads = TRUE,
   format = "fastq"
@@ -20,6 +21,8 @@ This table is standard output of \pkg{StrandPhaseR} and cen be found in subfolde
 \item{inputfolder}{Path to the bam files to process}
 
 \item{outputfolder}{Output directory. If non-existent it will be created.}
+
+\item{by.matepair}{If set to \code{TRUE} (the default) paired-end reads will be exported per mate-pair (read1 and read2).}
 
 \item{min.mapq}{Minimum mapping quality when importing from BAM files.}
 
