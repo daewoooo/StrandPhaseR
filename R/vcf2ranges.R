@@ -77,7 +77,7 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
       #tab <- Rsamtools::TabixFile(vcfFile, idx)
     }
   } else {
-    stop("VCF file: ", popul.vcf, " doesn't exists, quitting ...")
+    stop("VCF file: ", vcfFile, " doesn't exists, quitting ...")
   }
   
   ## Get VCF samples
