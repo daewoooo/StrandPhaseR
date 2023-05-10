@@ -25,6 +25,8 @@ Imports:
   S4Vectors,
   GenomeInfoDb,
   BiocGenerics,
+  BSgenome,
+  zoo,
   gtools,
   doParallel,
   parallel,
