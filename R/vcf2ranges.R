@@ -45,10 +45,8 @@ vcf2ranges <- function(vcfFile=NULL, genotypeField=1, chromosome=NULL) {
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
   return(vcf.gr)
-<<<<<<< HEAD
 }
-=======
-}
+
 
 #' Load a VCF file
 #' 
@@ -153,5 +151,4 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   }  
   
   return(vcf.vranges)
-} 
->>>>>>> origin/devel
+}

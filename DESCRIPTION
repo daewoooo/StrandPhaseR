@@ -1,11 +1,7 @@
 Package: StrandPhaseR
 Type: Package
 Title: Phase template strands from Strand-seq data
-<<<<<<< HEAD
-Version: 1.0.0
-=======
 Version: 0.99
->>>>>>> origin/devel
 Date: 2016-11-03
 Author: David Porubsky
 Maintainer: David Porubsky <porubsky@uw.edu>
@@ -21,19 +17,15 @@ Imports:
   Rsamtools,
   Biostrings,
   GenomicAlignments,
+  VariantAnnotation,
   grid,
   S4Vectors,
   GenomeInfoDb,
   BiocGenerics,
-  BSgenome,
-  zoo,
   gtools,
   doParallel,
   parallel,
   foreach,
-<<<<<<< HEAD
-  fastseg
-=======
   zoo,
   stats,
   fastseg,
@@ -44,7 +36,6 @@ Imports:
   methods,
   dplyr,
   magrittr
->>>>>>> origin/devel
 Suggests:
   knitr,
   testthat
@@ -54,8 +45,4 @@ LazyLoad: yes
 VignetteBuilder: knitr
 biocViews: Software, Sequencing, Haplotyping
 URL: https://github.com/daewoooo/StrandPhaseR
-<<<<<<< HEAD
-RoxygenNote: 6.1.1
-=======
 RoxygenNote: 7.2.3
->>>>>>> origin/devel
