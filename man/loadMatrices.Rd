@@ -5,8 +5,14 @@
 \title{This funcion will read in partial single cell haplotypes into
 two parallel matrices separately for Watson and Crick reads}
 \usage{
-loadMatrices(inputfolder = NULL, positions = NULL, WCregions = NULL,
-  pairedEndReads = FALSE, min.mapq = 10, min.baseq = 30)
+loadMatrices(
+  inputfolder = NULL,
+  positions = NULL,
+  WCregions = NULL,
+  pairedEndReads = FALSE,
+  min.mapq = 10,
+  min.baseq = 30
+)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}

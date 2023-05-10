@@ -5,8 +5,12 @@
 \title{This will take sorted matrices and will calculate concordance of each single cell to the consensus haplotypes in order to assemble highly 
 accurate haplotypes}
 \usage{
-compareSingleCellHaps(consensusHaps = NULL, sortedHaps = NULL,
-  bin.size = 10, step = 1)
+compareSingleCellHaps(
+  consensusHaps = NULL,
+  sortedHaps = NULL,
+  bin.size = 10,
+  step = 1
+)
 }
 \arguments{
 \item{consensusHaps}{A \code{list} returned by function \code{\link{assembleHaps}}}

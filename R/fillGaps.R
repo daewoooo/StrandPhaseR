@@ -15,7 +15,7 @@
 
 fillGapsWithBam <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, translateBases=FALSE, chromosome=NULL, chunkSize=10000000, filterAltAlign=TRUE) {
  
-  message(" Filling gaps in haplotypes", appendLF=F); ptm <- proc.time()
+  message(" Filling gaps in haplotypes", appendLF=FALSE); ptm <- proc.time()
   
   hap1.cons <- data.object[['hap1.cons']]
   hap2.cons <- data.object[['hap2.cons']]
@@ -241,7 +241,7 @@ fillGapsWithBam <- function(data.object, merged.bam, min.mapq=10, min.baseq=30, 
 
 fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   
-  message(" Filling gaps in haplotypes", appendLF=F); ptm <- proc.time()
+  message(" Filling gaps in haplotypes", appendLF=FALSE); ptm <- proc.time()
   
   hap1.cons <- data.object[['hap1.cons']]
   hap2.cons <- data.object[['hap2.cons']]
@@ -259,9 +259,19 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   #read in referene vcf file
   suppressMessages( snvs <- vcf2ranges(vcfFile=ref.vcf, genotypeField=1, chromosome=chromosome) )
   
+  ## Remove duplicated SNV positions if exists
+  msg <- NULL
+  dup.snvs <- any(duplicated(snvs))
+  if (dup.snvs) {
+    mask <- !duplicated(snvs)
+    removed.snvs <- table(mask)['FALSE']
+    snvs <- snvs[mask]
+    msg <- paste0("    Removed ", removed.snvs, " duplicated SNV positions!!!")
+  }
+  
   # Fill gaps in haplotype 1
-  hits.hap1 <- findOverlaps(snvs, hap1Gaps.gr)
-  missed.hap1 <- snvs[queryHits(hits.hap1)]
+  hits.hap1 <- IRanges::findOverlaps(snvs, hap1Gaps.gr)
+  missed.hap1 <- snvs[S4Vectors::queryHits(hits.hap1)]
   known.hap2 <- as.character(hap2.cons$bases[match(start(missed.hap1), hap2.cons$pos)])
   missed.hap1$fill <- rep("", length(missed.hap1))
   missed.hap1$fill[known.hap2 == missed.hap1$ref] <- missed.hap1$alt[known.hap2 == missed.hap1$ref]
@@ -275,7 +285,7 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   
   # Fill gaps in haplotype 2
   hits.hap2 <- findOverlaps(snvs, hap2Gaps.gr)
-  missed.hap2 <- snvs[queryHits(hits.hap2)]
+  missed.hap2 <- snvs[S4Vectors::queryHits(hits.hap2)]
   known.hap1 <- as.character(hap1.cons$bases[match(start(missed.hap2), hap1.cons$pos)])
   missed.hap2$fill <- rep("", length(missed.hap2))
   missed.hap2$fill[known.hap1 == missed.hap2$ref] <- missed.hap2$alt[known.hap1 == missed.hap2$ref]
@@ -296,5 +306,8 @@ fillGapsWithVCF <- function(data.object, ref.vcf, chromosome=NULL) {
   filled.haps[['assem.haps']] <- haps
   
   time <- proc.time() - ptm; message(" ",round(time[3],2),"s")
+  if (is.character(msg)) {
+    message(msg)
+  }
   return(filled.haps)
 }

@@ -4,8 +4,7 @@
 \alias{plotHapDensity}
 \title{This function will take phased data for each chromosome and plot density of phased SNVs}
 \usage{
-plotHapDensity(datapath, perChromosome = FALSE, file = NULL,
-  HighQual = FALSE)
+plotHapDensity(datapath, perChromosome = FALSE, file = NULL, HighQual = FALSE)
 }
 \arguments{
 \item{datapath}{containing split watson and crick reads per haplotype}

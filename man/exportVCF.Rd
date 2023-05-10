@@ -4,8 +4,16 @@
 \alias{exportVCF}
 \title{Generates a VCF file from phased haplotypes}
 \usage{
-exportVCF(index = NULL, outputfolder, phasedHap = NULL, bsGenome,
-  chromosome = chr)
+exportVCF(
+  index = NULL,
+  outputfolder = NULL,
+  phasedHap = NULL,
+  positions = NULL,
+  bsGenome = NULL,
+  ref.fasta = NULL,
+  chromosome = NULL,
+  assume.biallelic = FALSE
+)
 }
 \arguments{
 \item{index}{Unique identifier used to index analyzed individual/sample}
@@ -14,13 +22,20 @@ exportVCF(index = NULL, outputfolder, phasedHap = NULL, bsGenome,
 
 \item{phasedHap}{Data object containing phased haplotypes}
 
-\item{bsGenome}{A \code{BSgenome} object which contains reference genome usedto infer reference bases}
+\item{positions}{Set of heterozygous SNV positions used for phasing obtained from an input VCF files.}
+
+\item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
+
+\item{ref.fasta}{A user defined reference FASTA file to extract reference allele for all SNV positions.}
 
 \item{chromosome}{Name of the chromosome for which we want to export vcf file}
+
+\item{assume.biallelic}{If set to \code{TRUE} parameter 'snv.positions' is expected to contain biallelic loci (0/1, 1/0) and thus
+gaps in haplotypes will be filled accordingly.}
 }
 \description{
 Generates a VCF file from phased haplotypes
 }
 \author{
-David Porubsky, Ashley Sanders
+David Porubsky
 }

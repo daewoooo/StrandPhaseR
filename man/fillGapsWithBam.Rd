@@ -5,9 +5,16 @@
 \title{This function will take both assembled haplotypes and will try to fill gaps at positions where only one allele is phased
 Such position have to be heterozygous so the alternative allele at this position can be reliably distinguished}
 \usage{
-fillGapsWithBam(data.object, merged.bam, min.mapq = 10, min.baseq = 30,
-  translateBases = FALSE, chromosome = NULL, chunkSize = 1e+07,
-  filterAltAlign = TRUE)
+fillGapsWithBam(
+  data.object,
+  merged.bam,
+  min.mapq = 10,
+  min.baseq = 30,
+  translateBases = FALSE,
+  chromosome = NULL,
+  chunkSize = 1e+07,
+  filterAltAlign = TRUE
+)
 }
 \arguments{
 \item{data.object}{...}
@@ -18,7 +25,7 @@ fillGapsWithBam(data.object, merged.bam, min.mapq = 10, min.baseq = 30,
 
 \item{min.baseq}{Minimum base quality to consider a base for phasing.}
 
-\item{translateBases}{...}
+\item{translateBases}{translates integer coded bases (1,2,3,4) into letters (A,C,G,T)}
 
 \item{chromosome}{If only a subset of the chromosomes should be processed, specify them here.}
 

@@ -2,14 +2,28 @@
 % Please edit documentation in R/phaseChromsome.R
 \name{phaseChromosome}
 \alias{phaseChromosome}
-\title{Wrapper function for StrandPhaseR}
+\title{Wrapper function for StrandPhaseR to phase a single chromosome.}
 \usage{
-phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
-  positions = NULL, WCregions = NULL, chromosome = NULL,
-  pairedEndReads = TRUE, min.mapq = 10, min.baseq = 30,
-  num.iterations = 2, translateBases = TRUE, fillMissAllele = NULL,
-  splitPhasedReads = FALSE, compareSingleCells = FALSE,
-  exportVCF = NULL, bsGenome = NULL)
+phaseChromosome(
+  inputfolder,
+  outputfolder = "./StrandPhaseR_analysis",
+  positions = NULL,
+  WCregions = NULL,
+  chromosome = NULL,
+  pairedEndReads = TRUE,
+  min.mapq = 10,
+  min.baseq = 30,
+  num.iterations = 2,
+  translateBases = TRUE,
+  concordance = 0.9,
+  fillMissAllele = NULL,
+  splitPhasedReads = FALSE,
+  compareSingleCells = FALSE,
+  exportVCF = NULL,
+  bsGenome = NULL,
+  ref.fasta = NULL,
+  assume.biallelic = FALSE
+)
 }
 \arguments{
 \item{inputfolder}{Path to the bam files to process}
@@ -30,17 +44,24 @@ phaseChromosome(inputfolder, outputfolder = "./StrandPhaseR_analysis",
 
 \item{num.iterations}{Number of iteration to sort watson and crick matrices.}
 
-\item{translateBases}{...}
+\item{translateBases}{translates integer coded bases (1,2,3,4) into letters (A,C,G,T)}
+
+\item{concordance}{Level of agreement between single cell and consensus haplotypes}
+
+\item{fillMissAllele}{A patch to a single BAM or VCF file for a given sample to be used to fill missing alleles, uncovered in Strand-seq data.}
 
 \item{splitPhasedReads}{Set to \code{TRUE} if you want to split reads per haplotype.}
 
 \item{compareSingleCells}{Set to \code{TRUE} if you want to compare haplotypes at the single-cell level.}
 
-\item{exportVCF}{...}
+\item{exportVCF}{Ideally a sample ID that if defined invokes export of phased haplotypes in a separate VCF file.}
 
-\item{bsGenome}{A \code{BSgenome} object which contains the refernce DNA sequence}
+\item{bsGenome}{A \code{BSgenome} object which contains reference genome used to infer reference alleles.}
 
-\item{fillGaps}{...}
+\item{ref.fasta}{A user defined reference FASTA file to extract reference allele for all SNV positions.}
+
+\item{assume.biallelic}{If set to \code{TRUE} parameter 'snv.positions' is expected to contain biallelic loci (0/1, 1/0) and thus
+gaps in haplotypes will be filled accordingly.}
 }
 \description{
 This function will move through .bam files in a folder and perform several steps (see Details).
