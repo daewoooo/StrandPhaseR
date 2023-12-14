@@ -30,6 +30,7 @@ Imports:
   stats,
   fastseg,
   tidyr,
+  stringr,
   BSgenome,
   bamsignals,
   breakpointR,

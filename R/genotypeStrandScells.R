@@ -14,9 +14,15 @@
 #' @param blacklist A\code{\link{GRanges-class}} object of genomic regions to filter out SNV positions.
 #' @return A \code{data.frame} object.
 #' @importFrom S4Vectors endoapply
-#' @importFrom dplyr filter group_by summarise
-#' @importFrom VariantAnnotation readVcfAsVRanges
+#' @importFrom dplyr filter group_by summarise n
+#' @importFrom VariantAnnotation readVcfAsVRanges sampleNames ScanVcfParam ref alt
+#' @importFrom IRanges IRanges subsetByOverlaps
+#' @importFrom GenomicRanges GRanges
+#' @importFrom GenomeInfoDb keepSeqlevels
+#' @importFrom Rsamtools indexTabix
+#' @importFrom stringr str_split_fixed
 #' @author David Porubsky
+#' @export
 #' 
 genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.list=NULL, wc.regions=NULL, chromosomes=paste0('chr', c(1:22)), min.snv.cov=5, max.snv.cov=30, max.snv.per.chr=30000, blacklist=NULL) {
   ## Check user input
@@ -30,7 +36,7 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
   ## Filter non-alt alleles
   #snvs <- snvs[!is.na(alt(snvs))]
   ## Keep HETs only
-  snvs <- snvs[which(snvs$allele1 != snvs$allele2)]
+  snvs <- snvs[which(snvs$H1 != snvs$H2)]
   ## Filter sites based depth of coverage
   #snvs <- snvs[totalDepth(snvs) >= 5]
   DP <- VariantAnnotation::totalDepth(snvs)
@@ -56,11 +62,13 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
     ## Select SNVs for a single chromosome
     snvs.chr <- GenomeInfoDb::keepSeqlevels(snvs, value = chr, pruning.mode = 'coarse')
     ## Filter SNVs by depth
-    if (min.snv.cov > 0) {
-      snvs.chr <- snvs.chr[snvs.chr$DP >= min.snv.cov]
-    } 
-    if (max.snv.cov > 0) {
-      snvs.chr <- snvs.chr[snvs.chr$DP <= max.snv.cov]
+    if (all(!is.na(snvs.chr$DP))) {
+      if (min.snv.cov > 0) {
+        snvs.chr <- snvs.chr[snvs.chr$DP >= min.snv.cov]
+      } 
+      if (max.snv.cov > 0) {
+        snvs.chr <- snvs.chr[snvs.chr$DP <= max.snv.cov]
+      }
     }
     ## Filter SNVs by max allowed SNVs per chromosome
     if (max.snv.per.chr > 0) {
@@ -84,7 +92,7 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
     
     message("    Loading 1000G SNVs ...")
     ## Select genomic sites to load SNVs
-    target.sites <- GenomicRanges::GRanges(seqnames=chr, ranges=IRanges(start=matrices$genomic.pos, end=matrices$genomic.pos))
+    target.sites <- GenomicRanges::GRanges(seqnames=chr, ranges=IRanges::IRanges(start=matrices$genomic.pos, end=matrices$genomic.pos))
     ## TODO sync chromosome names if not matching between VCFs
     ## GenomeInfoDb::seqlevels(target.sites) <- gsub(GenomeInfoDb::seqlevels(target.sites), pattern = 'chr', replacement = '')
     
@@ -94,7 +102,7 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
       popul.vcf.tbi <- paste0(popul.vcf, '.tbi')
       if (!file.exists(popul.vcf.tbi)) {
         message(paste0("        Inderxing VCF file: ", popul.vcf))
-        idx <- indexTabix(popul.vcf, "vcf")
+        idx <- Rsamtools::indexTabix(popul.vcf, "vcf")
       }
     } else {
       stop("VCF file: ", popul.vcf, " doesn't exists, quitting ...")
@@ -116,7 +124,7 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
       region.ID <- matrices$row.IDs[i]
       cell.ID <- strsplit(as.character(region.ID), "__")[[1]][1]
       message("    Working on WC region: ", region.ID)
-      region.gr <- GenomicRanges::GRanges(seqnames=chr, ranges=IRanges(start=matrices$genomic.pos, end=matrices$genomic.pos), 
+      region.gr <- GenomicRanges::GRanges(seqnames=chr, ranges=IRanges::IRanges(start=matrices$genomic.pos, end=matrices$genomic.pos), 
                            crick=matrices$crick.bases[i,], 
                            watson=matrices$watson.bases[i,])
       #GenomeInfoDb::seqlevels(region.gr) <- gsub(GenomeInfoDb::seqlevels(region.gr), pattern = 'chr', replacement = '')
@@ -133,8 +141,9 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
       alt <- VariantAnnotation::alt(vcf.ranges)
       sampleNames <- VariantAnnotation::sampleNames(vcf.ranges)
       vcf.ranges.gr <- as(vcf.ranges, 'GRanges')
-      alleles <- strsplit(vcf.ranges.gr$GT, "\\/|\\|")
-      alleles <- do.call(rbind, alleles)
+      #alleles <- strsplit(vcf.ranges.gr$GT, "\\/|\\|")
+      #alleles <- do.call(rbind, alleles)
+      alleles <- stringr::str_split_fixed(string = vcf.ranges.gr$GT, pattern = '\\/|\\|', n = 2)
       allele1 <- ifelse(alleles[,1] == 0, ref, alt)
       allele2 <- ifelse(alleles[,2] == 0, ref, alt)
       sample.gr <- vcf.ranges.gr[,0]
@@ -152,7 +161,7 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
                                   toAllele2 = region.gr.sub$crick == sample.gr.sub$allele2,
                                   sample = sample.gr.sub$sampleNames)
       crick.compare.summary <- crick.compare %>% dplyr::filter(crick.snv != 'N') %>% dplyr::group_by(sample) %>%
-        dplyr::summarise(all.pos.crick = n(), agree.crick = pmax(length(toAllele1[toAllele1 == TRUE]), length(toAllele2[toAllele2 == TRUE])))
+        dplyr::summarise(all.pos.crick = dplyr::n(), agree.crick = pmax(length(toAllele1[toAllele1 == TRUE]), length(toAllele2[toAllele2 == TRUE])))
       if (nrow(crick.compare.summary) < length(all.1000G.samples)) {
         crick.compare.summary <- data.frame(sample=all.1000G.samples, all.pos.crick=0, agree.crick=0)
       }
@@ -162,7 +171,7 @@ genotypeStrandScells <- function(inputfolder=NULL, strandS.vcf=NULL, popul.vcf.l
                                    toAllele2 = region.gr.sub$watson == sample.gr.sub$allele2,
                                    sample = sample.gr.sub$sampleNames)
       watson.compare.summary <- watson.compare %>% dplyr::filter(watson.snv != 'N') %>% dplyr::group_by(sample) %>%
-        dplyr::summarise(all.pos.watson = n(), agree.watson = pmax(length(toAllele1[toAllele1 == TRUE]), length(toAllele2[toAllele2 == TRUE])))
+        dplyr::summarise(all.pos.watson = dplyr::n(), agree.watson = pmax(length(toAllele1[toAllele1 == TRUE]), length(toAllele2[toAllele2 == TRUE])))
       if (nrow(watson.compare.summary) < length(all.1000G.samples)) {
         watson.compare.summary <- data.frame(sample=all.1000G.samples, all.pos.watson=0, agree.watson=0)
       }
