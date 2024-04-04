@@ -118,7 +118,7 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
     vcf.vranges <- vcf.vranges[!mask]
   }
   ## Split genotype field into hapltypes
-  gen.field <-  tidyr::separate(data = as(mcols(vcf.vranges), 'data.frame'), col = GT, into = c("H1", "H2"))
+  gen.field <-  tidyr::separate(data = as(mcols(vcf.vranges), 'data.frame'), remove = FALSE, col = GT, into = c("H1", "H2"))
   ## Translate 0/1 haplotypes into nucleotides
   if (translateBases) {
     allele1 <- rep(".", length(vcf.vranges))
