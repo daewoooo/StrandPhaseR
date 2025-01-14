@@ -114,8 +114,8 @@ vcf2vranges <- function(vcfFile=NULL, genoField=NULL, translateBases=TRUE, genom
   }  
   ## Remove unhased variants
   if (phased) {
-    mask <- grepl(vcf.vranges$GT, pattern = "\\/")
-    vcf.vranges <- vcf.vranges[!mask]
+    mask <- grepl(vcf.vranges$GT, pattern = "\\|")
+    vcf.vranges <- vcf.vranges[mask]
   }
   ## Split genotype field into hapltypes
   gen.field <-  tidyr::separate(data = as(mcols(vcf.vranges), 'data.frame'), remove = FALSE, col = GT, into = c("H1", "H2"))
